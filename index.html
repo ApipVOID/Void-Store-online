@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID STORE | By Apip</title>
+    <title>VOID STORE | Web JB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     
@@ -12,13 +12,14 @@
 
     <style>
         :root { --purple-gojo: #a0f; }
-        body { background-color: #050505; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
+        body { background-color: #050505; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
         .glow-text { text-shadow: 0 0 15px var(--purple-gojo); }
         .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(160, 0, 255, 0.2); transition: 0.4s; }
         .btn-tele { background: linear-gradient(45deg, #a0f, #60f); transition: 0.3s; }
         .btn-tele:hover { box-shadow: 0 0 20px var(--purple-gojo); transform: scale(1.02); }
         .hidden { display: none; }
         input::placeholder { color: #444; }
+        footer { margin-top: auto; border-top: 1px solid rgba(160, 0, 255, 0.1); }
     </style>
 </head>
 <body class="p-6 md:p-12">
@@ -28,30 +29,44 @@
         <p id="adminStatus" class="text-gray-500 text-xs tracking-[0.3em] uppercase">Global Online Catalog</p>
     </header>
 
-    <section id="adminPanel" class="max-w-2xl mx-auto mb-20 p-8 glass-card rounded-3xl hidden border-t-2 border-purple-500">
+    <section id="adminPanel" class="max-w-3xl mx-auto mb-20 p-8 glass-card rounded-3xl hidden border-t-2 border-purple-500">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-purple-400 italic">Admin Expansion 🛠️</h2>
-            <button onclick="logoutAdmin()" class="text-gray-500 hover:text-white text-xs">Close</button>
+            <h2 class="text-xl font-bold text-purple-400 italic">Admin Dashboard 🛠️</h2>
+            <button onclick="logoutAdmin()" class="text-gray-500 hover:text-white text-xs px-3 py-1 border border-gray-800 rounded-lg">Exit Mode</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" id="pName" placeholder="Nama Produk..." class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
-            <input type="text" id="pPrice" placeholder="Harga (misal: 250k)..." class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
-            <input type="text" id="pImg" placeholder="Link Gambar (URL)..." class="bg-black/50 border border-gray-800 p-3 rounded-xl md:col-span-2 outline-none focus:border-purple-500 transition">
-            <button onclick="addProduct()" class="md:col-span-2 bg-white text-black font-black py-4 rounded-xl hover:bg-purple-500 hover:text-white transition-all uppercase tracking-widest active:scale-95">
-                Post to Cloud
-            </button>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Tambah Produk Baru</h3>
+                <input type="text" id="pName" placeholder="Nama Produk..." class="w-full bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
+                <input type="text" id="pPrice" placeholder="Harga (misal: 250k)..." class="w-full bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
+                <input type="text" id="pImg" placeholder="Link Gambar (URL)..." class="w-full bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
+                <button onclick="addProduct()" class="w-full bg-white text-black font-black py-3 rounded-xl hover:bg-purple-500 hover:text-white transition uppercase tracking-widest">Post to Cloud</button>
+            </div>
+
+            <div class="space-y-4 p-4 bg-purple-900/10 rounded-2xl border border-purple-500/20">
+                <h3 class="text-sm font-bold text-purple-400 uppercase tracking-widest">Pengaturan Order</h3>
+                <div>
+                    <label class="text-[10px] text-gray-500 ml-1">Username Telegram (tanpa @)</label>
+                    <input type="text" id="configTele" class="w-full bg-black/50 border border-gray-800 p-2 rounded-lg outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <label class="text-[10px] text-gray-500 ml-1">Teks Order Awal</label>
+                    <input type="text" id="configText" class="w-full bg-black/50 border border-gray-800 p-2 rounded-lg outline-none focus:border-purple-500">
+                </div>
+                <button onclick="updateConfig()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl hover:bg-purple-500 transition uppercase text-xs tracking-widest">Update Settings</button>
+            </div>
         </div>
     </section>
 
-    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        </main>
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20"></main>
 
-    <footer class="mt-32 text-center text-[10px] text-gray-700 tracking-widest uppercase">
-        Protected by Infinite Void | Press Shift + A to login
+    <footer class="py-10 text-center">
+        <p class="text-gray-500 text-xs tracking-[0.2em] uppercase mb-2">Dibuat oleh Apip</p>
+        <p class="text-[10px] text-gray-700">VOID STORE &copy; 2026 | Infinite Void System</p>
     </footer>
 
     <script>
-        // FIREBASE CONFIG KAMU
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -62,47 +77,38 @@
             appId: "1:210609106495:web:d3d6d31d9ca8427c48928a"
         };
 
-        // Inisialisasi
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        const TELEGRAM_USERNAME = "fyzzrq"; // Ganti dengan username Tele kamu
-        const ADMIN_PASSWORD = "201120"; 
         let isAdminActive = false;
+        let currentProducts = null;
+        let shopConfig = { tele: "apipvoid", text: "Halo, saya mau order" }; // Default
 
-        // 1. Deteksi Login Rahasia
-        document.addEventListener('keydown', (e) => {
-            if (e.shiftKey && e.key === 'A') {
-                const pass = prompt("Masukkan Access Code:");
-                if (pass === ADMIN_PASSWORD) {
-                    isAdminActive = true;
-                    document.getElementById('adminPanel').classList.remove('hidden');
-                    document.getElementById('adminStatus').innerText = "ADMIN MODE ACTIVE";
-                    document.getElementById('adminStatus').classList.add('text-purple-500');
-                    renderProducts(); // Refresh untuk munculkan tombol hapus
-                }
+        // 1. Ambil Pengaturan Toko dari Firebase
+        db.ref('config').on('value', (snapshot) => {
+            if (snapshot.val()) {
+                shopConfig = snapshot.val();
+                document.getElementById('configTele').value = shopConfig.tele;
+                document.getElementById('configText').value = shopConfig.text;
+                renderProducts(currentProducts);
             }
         });
 
-        function logoutAdmin() {
-            isAdminActive = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminStatus').innerText = "Global Online Catalog";
-            document.getElementById('adminStatus').classList.remove('text-purple-500');
-            renderProducts();
-        }
-
-        // 2. Ambil Data Realtime dari Firebase
+        // 2. Ambil Produk Realtime
         db.ref('products').on('value', (snapshot) => {
+            currentProducts = snapshot.val();
+            renderProducts(currentProducts);
+        });
+
+        // 3. Render Fungsi
+        function renderProducts(data) {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
-            const data = snapshot.val();
-
             if (data) {
                 Object.keys(data).forEach((key) => {
                     const item = data[key];
                     const deleteBtn = isAdminActive ? 
-                        `<button onclick="deleteProduct('${key}')" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white w-10 h-10 rounded-full z-30 transition">✕</button>` : '';
+                        `<button onclick="deleteProduct('${key}')" class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white w-10 h-10 rounded-full z-40 flex items-center justify-center font-bold">✕</button>` : '';
 
                     catalog.innerHTML += `
                         <div class="glass-card rounded-[2rem] overflow-hidden p-5 group relative">
@@ -112,45 +118,62 @@
                             </div>
                             <h3 class="text-xl font-bold mb-1 tracking-tight">${item.name}</h3>
                             <p class="text-purple-500 font-bold text-lg mb-6 tracking-tighter">IDR ${item.price}</p>
-                            <a href="https://t.me/${TELEGRAM_USERNAME}?text=Halo, saya mau order ${encodeURIComponent(item.name)}" 
+                            <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text)}%20${encodeURIComponent(item.name)}" 
                                target="_blank" 
                                class="btn-tele block text-center py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest text-white">
-                               Buy Now
+                               Buy via Telegram
                             </a>
                         </div>
                     `;
                 });
             } else {
-                catalog.innerHTML = '<p class="col-span-full text-center text-gray-600 py-20 italic">Catalog is empty. Add some drops!</p>';
+                catalog.innerHTML = '<p class="col-span-full text-center text-gray-600 py-20 italic">No products available.</p>';
+            }
+        }
+
+        // 4. Admin Logic
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key === 'A') {
+                const pass = prompt("Access Code:");
+                if (pass === "gojo") {
+                    isAdminActive = true;
+                    document.getElementById('adminPanel').classList.remove('hidden');
+                    document.getElementById('adminStatus').innerText = "ADMIN MODE ACTIVE";
+                    document.getElementById('adminStatus').style.color = "#a0f";
+                    renderProducts(currentProducts);
+                }
             }
         });
 
-        // 3. Tambah Produk ke Firebase
+        function logoutAdmin() {
+            isAdminActive = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminStatus').innerText = "Global Online Catalog";
+            document.getElementById('adminStatus').style.color = "#666";
+            renderProducts(currentProducts);
+        }
+
+        function updateConfig() {
+            const newTele = document.getElementById('configTele').value;
+            const newText = document.getElementById('configText').value;
+            db.ref('config').set({ tele: newTele, text: newText });
+            alert("Settings updated!");
+        }
+
         function addProduct() {
             const name = document.getElementById('pName').value;
             const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/500x500/0a0a0a/333?text=Void+Store';
-
+            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/500';
             if (name && price) {
                 db.ref('products').push({ name, price, img });
-                // Reset form
                 document.getElementById('pName').value = '';
                 document.getElementById('pPrice').value = '';
                 document.getElementById('pImg').value = '';
-            } else {
-                alert("Minimal isi Nama dan Harga!");
             }
         }
 
-        // 4. Hapus Produk dari Firebase
         function deleteProduct(key) {
-            if (confirm("Hapus produk ini dari database selamanya?")) {
-                db.ref('products/' + key).remove();
-            }
-        }
-
-        function renderProducts() {
-            // Pemanggilan ulang database sudah otomatis via db.ref().on()
+            if (confirm("Delete permanently?")) db.ref('products/' + key).remove();
         }
     </script>
 </body>
