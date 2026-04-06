@@ -3,134 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID STORE | Domain Expansion Edition</title>
+    <title>VOID STORE | Dynamic Category Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --purple-gojo: #a0f; --neon-blue: #0ff; }
-        body { background-color: #050505; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        :root { --purple-gojo: #a0f; }
+        body { background-color: #050505; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
         .glow-text { text-shadow: 0 0 15px var(--purple-gojo); }
-        .glow-border:focus { box-shadow: 0 0 10px var(--purple-gojo); border-color: var(--purple-gojo); }
-        .glass-card { background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(10px); border: 1px solid rgba(160, 0, 255, 0.15); transition: 0.4s; }
-        .glass-card:hover { border-color: rgba(160, 0, 255, 0.4); box-shadow: 0 0 20px rgba(160, 0, 255, 0.1); }
-        
-        /* Buttons */
-        .btn-tele { background: linear-gradient(45deg, #2196F3, #00BCD4); transition: 0.3s; }
-        .btn-wa { background: linear-gradient(45deg, #4CAF50, #8BC34A); transition: 0.3s; }
-        .btn-tele:hover, .btn-wa:hover { transform: scale(1.03); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
-        
-        /* Sold Out Effect */
-        .sold-out-overlay { background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; position: absolute; inset: 0; z-index: 10; opacity: 0; transition: 0.3s; }
-        .is-sold-out .sold-out-overlay { opacity: 1; }
-        .is-sold-out img { filter: grayscale(100%) blur(2px); }
-        
-        /* Skeleton Animation */
-        @keyframes pulse { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
-        .skeleton { background-color: #fff; animation: pulse 1.5s infinite; border-radius: 1rem; }
-        
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(160, 0, 255, 0.15); transition: 0.3s; }
+        .btn-tele { background: linear-gradient(45deg, #2196F3, #00BCD4); }
+        .btn-wa { background: linear-gradient(45deg, #4CAF50, #8BC34A); }
+        .is-sold-out img { filter: grayscale(100%) contrast(0.5); }
+        .sold-out-badge { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 10; pointer-events: none; }
+        .tab-active { background: white !important; color: black !important; box-shadow: 0 0 15px white; }
         .hidden { display: none !important; }
-        footer { margin-top: auto; border-top: 1px solid rgba(160, 0, 255, 0.05); }
-        
-        /* Category Tabs */
-        .tab-btn { border: 1px solid rgba(255,255,255,0.1); color: #888; transition: 0.3s; }
-        .tab-btn.active { background-color: white; color: black; border-color: white; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <header class="text-center mb-10 relative">
-        <div class="absolute -top-10 -left-10 w-40 h-40 bg-purple-900/20 rounded-full blur-3xl opacity-50"></div>
-        <h1 class="text-5xl md:text-7xl font-bold glow-text mb-2 italic tracking-tighter uppercase relative z-10">Void Store</h1>
-        <p id="adminStatus" class="text-gray-600 text-[10px] tracking-[0.4em] uppercase mb-8">Unlimited Catalog Access</p>
+    <header class="text-center mb-10">
+        <h1 class="text-6xl font-bold glow-text mb-4 italic tracking-tighter uppercase">Void Store</h1>
         
-        <div class="max-w-xl mx-auto mb-6 relative z-10">
-            <input type="text" id="searchBar" placeholder="Cari produk 'Gojo'..." class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none glow-border transition text-white placeholder:text-gray-700">
-            <span class="absolute right-5 top-4 text-gray-700">🔍</span>
+        <div class="max-w-xl mx-auto mb-6">
+            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Cari barang..." class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-purple-500 transition text-white">
         </div>
 
-        <div class="flex flex-wrap justify-center gap-2 md:gap-3 mb-10 relative z-10" id="categoryTabs">
-            <button class="tab-btn active px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider" onclick="filterCategory('all')">Semua</button>
-            <button class="tab-btn px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider" onclick="filterCategory('kaos')">Kaos</button>
-            <button class="tab-btn px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider" onclick="filterCategory('hoodie')">Hoodie</button>
-            <button class="tab-btn px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider" onclick="filterCategory('aksesoris')">Aksesoris</button>
-        </div>
+        <div class="flex flex-wrap justify-center gap-2 mb-10" id="tabsContainer">
+            </div>
     </header>
 
-    <section id="adminPanel" class="max-w-5xl mx-auto mb-16 p-6 md:p-8 glass-card rounded-3xl hidden border-t-2 border-purple-500 shadow-2xl shadow-purple-900/20 relative z-50">
+    <section id="adminPanel" class="max-w-5xl mx-auto mb-16 p-6 glass-card rounded-3xl hidden border-t-2 border-purple-500 shadow-2xl">
         <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-800">
-            <h2 class="text-2xl font-bold text-purple-400 italic glow-text">Domain Expansion: Admin Dashboard 🛠️</h2>
-            <button onclick="logoutAdmin()" class="text-gray-500 hover:text-white text-xs px-4 py-2 border border-gray-800 rounded-xl transition active:scale-95">Exit Mode</button>
+            <h2 class="text-xl font-bold text-purple-400 italic">ADMIN EXPANSION 🛠️</h2>
+            <button onclick="toggleAdmin(false)" class="text-gray-500 hover:text-white text-xs border border-gray-800 px-3 py-1 rounded-lg">Exit</button>
         </div>
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-4">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Tambah Produk Baru</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="pName" placeholder="Nama Produk..." class="w-full bg-black/50 border border-gray-800 p-3.5 rounded-xl focus:border-purple-500 outline-none transition">
-                    <input type="text" id="pPrice" placeholder="Harga (misal: 250k)..." class="w-full bg-black/50 border border-gray-800 p-3.5 rounded-xl focus:border-purple-500 outline-none transition">
-                    <input type="text" id="pImg" placeholder="Link Gambar (URL)..." class="w-full bg-black/50 border border-gray-800 p-3.5 rounded-xl focus:border-purple-500 outline-none transition">
-                    <select id="pCategory" class="w-full bg-black/50 border border-gray-800 p-3.5 rounded-xl focus:border-purple-500 outline-none transition text-gray-400">
-                        <option value="kaos">Kategori: Kaos</option>
-                        <option value="hoodie">Kategori: Hoodie</option>
-                        <option value="aksesoris">Kategori: Aksesoris</option>
+            <div class="space-y-3">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Tambah Produk</p>
+                <input type="text" id="pName" placeholder="Nama Produk" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none focus:border-purple-500">
+                <input type="text" id="pPrice" placeholder="Harga (250k)" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
+                <input type="text" id="pImg" placeholder="Link Gambar" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
+                <select id="pCatSelect" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none text-gray-400">
                     </select>
-                </div>
-                <button onclick="addProduct()" class="w-full bg-white text-black font-black py-4 rounded-xl hover:bg-purple-500 hover:text-white transition-all uppercase tracking-widest active:scale-95 shadow-lg shadow-white/10">Post to Cloud Database</button>
+                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-purple-500 hover:text-white transition">POST PRODUCT</button>
             </div>
 
-            <div class="space-y-4 p-5 bg-purple-950/20 rounded-2xl border border-purple-800/30 shadow-inner">
-                <h3 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-3">Pengaturan Order Online</h3>
-                <div class="space-y-3">
-                    <input type="text" id="configTele" placeholder="Username Telegram (tanpa @)" class="w-full bg-black/50 border border-gray-800 p-3 rounded-lg outline-none focus:border-purple-500 text-xs">
-                    <input type="text" id="configWa" placeholder="Nomor WA (contoh: 628123...)" class="w-full bg-black/50 border border-gray-800 p-3 rounded-lg outline-none focus:border-green-500 text-xs">
-                    <input type="text" id="configText" placeholder="Teks Order Awal (Semua Platform)" class="w-full bg-black/50 border border-gray-800 p-3 rounded-lg outline-none focus:border-purple-500 text-xs">
+            <div class="space-y-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Manajemen Kategori</p>
+                <div class="flex gap-2">
+                    <input type="text" id="newCatName" placeholder="Nama Kategori..." class="w-full bg-black border border-gray-800 p-2 rounded-lg text-sm outline-none">
+                    <button onclick="addCategory()" class="bg-purple-600 px-4 rounded-lg font-bold">+</button>
                 </div>
-                <button onclick="updateConfig()" class="w-full bg-purple-600 text-white font-bold py-2.5 rounded-xl hover:bg-purple-500 transition uppercase text-[10px] tracking-widest active:scale-95">Update All Settings</button>
+                <div id="adminCatList" class="text-[10px] space-y-1 max-h-32 overflow-y-auto">
+                    </div>
+            </div>
+
+            <div class="space-y-3 p-4 bg-purple-900/10 rounded-2xl">
+                <p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Shop Config</p>
+                <input type="text" id="cfgTele" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
+                <input type="text" id="cfgWa" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
+                <input type="text" id="cfgText" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
+                <button onclick="updateConfig()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-[10px] tracking-widest">UPDATE SETTINGS</button>
             </div>
         </div>
     </section>
 
-    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-24 relative z-10">
-        <div class="skeleton-loader glass-card rounded-[2rem] p-5 space-y-4">
-            <div class="skeleton w-full h-64"></div>
-            <div class="skeleton w-3/4 h-6"></div>
-            <div class="skeleton w-1/2 h-5"></div>
-            <div class="skeleton w-full h-12"></div>
-        </div>
-        <div class="skeleton-loader glass-card rounded-[2rem] p-5 space-y-4 hidden sm:block">
-            <div class="skeleton w-full h-64"></div>
-            <div class="skeleton w-3/4 h-6"></div>
-            <div class="skeleton w-1/2 h-5"></div>
-            <div class="skeleton w-full h-12"></div>
-        </div>
-        <div class="skeleton-loader glass-card rounded-[2rem] p-5 space-y-4 hidden lg:block">
-            <div class="skeleton w-full h-64"></div>
-            <div class="skeleton w-3/4 h-6"></div>
-            <div class="skeleton w-1/2 h-5"></div>
-            <div class="skeleton w-full h-12"></div>
-        </div>
-        <div class="skeleton-loader glass-card rounded-[2rem] p-5 space-y-4 hidden lg:block">
-            <div class="skeleton w-full h-64"></div>
-            <div class="skeleton w-3/4 h-6"></div>
-            <div class="skeleton w-1/2 h-5"></div>
-            <div class="skeleton w-full h-12"></div>
-        </div>
-    </main>
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20"></main>
 
-    <footer class="py-12 text-center relative z-10 mt-auto">
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-20 bg-purple-900/10 rounded-full blur-3xl opacity-30"></div>
-        <p class="text-gray-600 text-xs tracking-[0.3em] uppercase mb-2 relative z-10">Dibuat oleh Apip</p>
-        <p class="text-[9px] text-gray-800 relative z-10">VOID STORE &copy; 2026 | Infinite Void Logistics System</p>
+    <footer class="py-10 text-center mt-auto border-t border-gray-900">
+        <p class="text-gray-600 text-[10px] tracking-widest uppercase">Dibuat oleh Apip</p>
     </footer>
 
-    <audio id="audioDomain" src="https://github.com/ApipVOID/Void-Store-online/raw/main/domain.mp3" preload="auto"></audio>
-
     <script>
-        // --- KONFIGURASI FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -144,239 +92,154 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- STATE & VARIABEL GLOBAL ---
-        let isAdminActive = false;
-        let currentRawData = null; // Data mentah dari Firebase
-        let shopConfig = { tele: "apipvoid", wa: "628123456789", text: "Halo, saya mau order" }; // Default
-        let activeCategory = 'all';
+        let isAdmin = false;
+        let masterData = null;
+        let categories = {};
+        let shopConfig = { tele: 'apipvoid', wa: '628123', text: 'Order' };
+        let currentTab = 'all';
         let searchQuery = '';
 
-        // --- 1. INISIALISASI & LISTENER FIREBASE ---
+        // --- FIREBASE LISTENERS ---
 
-        // A. Ambil Config Toko (Termasuk Nomor WA)
-        db.ref('config').on('value', (snapshot) => {
-            if (snapshot.val()) {
-                shopConfig = snapshot.val();
-                // Isi input di admin panel agar sesuai data cloud
-                document.getElementById('configTele').value = shopConfig.tele;
-                document.getElementById('configWa').value = shopConfig.wa;
-                document.getElementById('configText').value = shopConfig.text;
-                // Jangan render dulu, nunggu data produk
+        db.ref('config').on('value', snap => {
+            if(snap.val()) {
+                shopConfig = snap.val();
+                document.getElementById('cfgTele').value = shopConfig.tele;
+                document.getElementById('cfgWa').value = shopConfig.wa;
+                document.getElementById('cfgText').value = shopConfig.text;
+                render();
             }
         });
 
-        // B. Ambil Produk Realtime (Listener Utama)
-        db.ref('products').on('value', (snapshot) => {
-            currentRawData = snapshot.val();
-            // Matikan skeleton loader
-            const skeletons = document.querySelectorAll('.skeleton-loader');
-            skeletons.forEach(s => s.classList.add('hidden'));
-            
-            // Render data yang sudah difilter
-            processAndRender();
+        db.ref('categories').on('value', snap => {
+            categories = snap.val() || {};
+            updateCategoryUI();
         });
 
-        // --- 2. FUNGSI PEMROSESAN DATA (FILTER & SEARCH) ---
+        db.ref('products').on('value', snap => {
+            masterData = snap.val();
+            render();
+        });
 
-        function processAndRender() {
-            if (!currentRawData) {
-                renderProducts(null);
-                return;
-            }
+        // --- FUNCTIONS ---
 
-            // Ubah objek Firebase jadi Array agar mudah difilter
-            let processedArray = Object.keys(currentRawData).map(key => ({
-                id: key,
-                ...currentRawData[key]
-            }));
+        function updateCategoryUI() {
+            const tabsContainer = document.getElementById('tabsContainer');
+            const selectContainer = document.getElementById('pCatSelect');
+            const adminCatList = document.getElementById('adminCatList');
 
-            // A. Filter Kategori
-            if (activeCategory !== 'all') {
-                processedArray = processedArray.filter(item => item.category === activeCategory);
-            }
+            tabsContainer.innerHTML = `<button onclick="changeTab('all')" class="tab-btn tab-active px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase transition">Semua</button>`;
+            selectContainer.innerHTML = '';
+            adminCatList.innerHTML = '';
 
-            // B. Filter Pencarian (Feature 2)
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                processedArray = processedArray.filter(item => 
-                    item.name.toLowerCase().includes(query)
-                );
-            }
+            Object.keys(categories).forEach(key => {
+                const catName = categories[key].name;
+                const catSlug = catName.toLowerCase().replace(/\s+/g, '-');
 
-            // Kirim hasil akhir ke fungsi render
-            renderProducts(processedArray);
+                // Ke Halaman Depan (Tabs)
+                tabsContainer.innerHTML += `<button onclick="changeTab('${catSlug}')" class="tab-btn px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase transition">${catName}</button>`;
+                
+                // Ke Pilihan Admin (Select)
+                selectContainer.innerHTML += `<option value="${catSlug}">${catName}</option>`;
+
+                // Ke Daftar Admin (Hapus)
+                adminCatList.innerHTML += `<div class="flex justify-between bg-white/5 p-1 px-2 rounded"><span>${catName}</span><button onclick="deleteCategory('${key}')" class="text-red-500">Hapus</button></div>`;
+            });
         }
 
-        // --- 3. FUNGSI RENDER HTML UTAMA ---
-
-        function renderProducts(dataArray) {
+        function render() {
             const catalog = document.getElementById('catalog');
-            catalog.innerHTML = ''; // Kosongkan katalog
+            catalog.innerHTML = '';
+            if(!masterData) return;
 
-            // Balik urutan agar produk terbaru di atas
-            if (dataArray) dataArray.reverse();
+            Object.keys(masterData).forEach(key => {
+                const item = masterData[key];
+                const matchesTab = currentTab === 'all' || item.category === currentTab;
+                const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-            if (dataArray && dataArray.length > 0) {
-                dataArray.forEach((item) => {
-                    const key = item.id;
+                if(matchesTab && matchesSearch) {
+                    const delBtn = isAdmin ? `<button onclick="deleteItem('${key}')" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full z-30">✕</button>` : '';
+                    const sldBtn = isAdmin ? `<button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-2 left-2 bg-gray-800 text-[10px] px-2 py-1 rounded-lg z-30">${item.soldOut ? 'Available' : 'Sold Out'}</button>` : '';
                     
-                    // Tombol Hapus (Hanya muncul jika Admin Aktif)
-                    const deleteBtn = isAdminActive ? 
-                        `<button onclick="deleteProduct('${key}')" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white w-9 h-9 rounded-full z-50 flex items-center justify-center font-bold shadow-lg transition active:scale-95">✕</button>` : '';
-
-                    // Tombol Sold Out (Feature 3, Hanya muncul jika Admin Aktif)
-                    const soldToggleBtn = isAdminActive ?
-                        `<button onclick="toggleSoldOut('${key}', ${item.soldOut})" class="absolute top-4 left-4 ${item.soldOut ? 'bg-green-600' : 'bg-gray-700'} text-white px-3 py-1.5 rounded-full z-50 text-[9px] font-bold uppercase tracking-wider active:scale-95">
-                            ${item.soldOut ? 'Mark Available' : 'Mark Sold Out'}
-                        </button>` : '';
-
-                    // Status Sold Out (Efek Visual)
-                    const soldOutClass = item.soldOut ? 'is-sold-out' : '';
-                    const soldOutBadge = item.soldOut ? 
-                        `<div class="sold-out-overlay rounded-2xl">
-                            <span class="text-3xl font-black text-white uppercase tracking-tighter glow-text border-2 border-white px-4 py-1 rotate-[-10deg]">SOLD OUT</span>
-                        </div>` : '';
-
-                    // Link Order WA & Tele
-                    const encodedText = encodeURIComponent(shopConfig.text + " " + item.name);
-                    const waLink = `https://wa.me/${shopConfig.wa}?text=${encodedText}`;
-                    const teleLink = `https://t.me/${shopConfig.tele}?text=${encodedText}`;
-
-                    // Buat HTML Kartu Produk
                     catalog.innerHTML += `
-                        <div class="glass-card rounded-[2rem] overflow-hidden p-5 group relative ${soldOutClass} transition-all duration-500">
-                            ${deleteBtn}
-                            ${soldToggleBtn}
-                            
-                            <div class="overflow-hidden rounded-2xl mb-5 h-64 relative">
-                                ${soldOutBadge}
-                                <img src="${item.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700 ease-in-out">
-                            </div>
-                            
-                            <h3 class="text-xl font-bold mb-1 tracking-tight text-white group-hover:text-purple-300 transition">${item.name}</h3>
-                            <p class="text-purple-500 font-bold text-lg mb-6 tracking-tighter">IDR ${item.price}</p>
-                            
-                            <div class="grid grid-cols-2 gap-2 mt-auto">
-                                <a href="${teleLink}" target="_blank" class="btn-tele text-center py-3 rounded-xl font-bold uppercase text-[9px] tracking-widest text-white active:scale-95">Telegram</a>
-                                <a href="${waLink}" target="_blank" class="btn-wa text-center py-3 rounded-xl font-bold uppercase text-[9px] tracking-widest text-white active:scale-95">WhatsApp</a>
+                        <div class="glass-card rounded-[2rem] p-4 relative overflow-hidden group ${item.soldOut ? 'is-sold-out' : ''}">
+                            ${delBtn} ${sldBtn}
+                            ${item.soldOut ? '<div class="sold-out-badge"><span class="font-bold border-2 border-white px-3 py-1 rotate-[-10deg]">SOLD OUT</span></div>' : ''}
+                            <img src="${item.img}" class="w-full h-60 object-cover rounded-2xl mb-4 group-hover:scale-105 transition duration-500">
+                            <h3 class="font-bold mb-1">${item.name}</h3>
+                            <p class="text-purple-500 font-bold mb-4">IDR ${item.price}</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-tele text-center py-2 rounded-xl text-[10px] font-bold text-white uppercase">Telegram</a>
+                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-wa text-center py-2 rounded-xl text-[10px] font-bold text-white uppercase">WhatsApp</a>
                             </div>
                         </div>
                     `;
-                });
-            } else {
-                // Tampilan jika produk tidak ditemukan (setelah search/filter)
-                catalog.innerHTML = `
-                    <div class="col-span-full text-center py-20 bg-gray-950 rounded-3xl border border-gray-900 glass-card">
-                        <span class="text-6xl mb-4 block">🚫</span>
-                        <p class="text-gray-600 italic">Produk tidak ditemukan. Coba kata kunci atau kategori lain.</p>
-                    </div>
-                `;
-            }
-        }
-
-        // --- 4. LOGIKA FITUR (SEARCH, FILTER, ADMIN) ---
-
-        // Fitur 2: Search Bar Listener
-        document.getElementById('searchBar').addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            processAndRender(); // Re-render dengan filter search
-        });
-
-        // Fitur 1: Category Filter Logic
-        function filterCategory(category) {
-            activeCategory = category;
-            // Update UI Tombol Tab
-            const tabs = document.querySelectorAll('#categoryTabs button');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            processAndRender(); // Re-render dengan filter kategori
-        }
-
-        // Fitur 5: Admin Login (Shift + A) & Sound Effect
-        document.addEventListener('keydown', (e) => {
-            if (e.shiftKey && e.key === 'A' && !isAdminActive) {
-                const pass = prompt("Access Code:");
-                if (pass === "gojo") {
-                    isAdminActive = true;
-                    
-                    // Mainkan suara Domain Expansion
-                    const audio = document.getElementById('audioDomain');
-                    audio.play().catch(e => console.log("Audio blm di-unlock browser"));
-
-                    document.getElementById('adminPanel').classList.remove('hidden');
-                    document.getElementById('adminStatus').innerText = "ADMIN MODE ACTIVE (DOMAIN EXPANDED)";
-                    document.getElementById('adminStatus').style.color = "#a0f";
-                    
-                    // Re-render agar muncul tombol X dan SoldOut
-                    processAndRender();
-                    
-                    // Scroll ke panel admin
-                    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
                 }
+            });
+        }
+
+        // --- ADMIN OPERATIONS ---
+
+        document.addEventListener('keydown', e => {
+            if(e.shiftKey && e.key === 'A') {
+                if(prompt("Code:") === "gojo") toggleAdmin(true);
             }
         });
 
-        function logoutAdmin() {
-            isAdminActive = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminStatus').innerText = "Unlimited Catalog Access";
-            document.getElementById('adminStatus').style.color = "#666";
-            processAndRender(); // Hapus tombol admin
+        function toggleAdmin(status) {
+            isAdmin = status;
+            document.getElementById('adminPanel').classList.toggle('hidden', !status);
+            render();
         }
 
-        // --- 5. LOGIKA DATABASE (CRUD & CONFIG) ---
+        function addCategory() {
+            const name = document.getElementById('newCatName').value;
+            if(name) {
+                db.ref('categories').push({ name: name });
+                document.getElementById('newCatName').value = '';
+            }
+        }
 
-        // Update Config (Termasuk No WA - Feature 4)
-        function updateConfig() {
-            const newTele = document.getElementById('configTele').value;
-            const newWa = document.getElementById('configWa').value;
-            const newText = document.getElementById('configText').value;
-            
-            if (newTele && newWa && newText) {
-                db.ref('config').set({ tele: newTele, wa: newWa, text: newText });
-                alert("Pengaturan order online berhasil diperbarui ke Cloud!");
-            } else {
-                alert("Semua field pengaturan wajib diisi!");
+        function deleteCategory(key) {
+            if(confirm("Hapus kategori ini? Produk dengan kategori ini tidak akan hilang, tapi tidak akan muncul di filter.")) {
+                db.ref('categories/' + key).remove();
             }
         }
 
         function addProduct() {
             const name = document.getElementById('pName').value;
             const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/600x600/0a0a0a/444?text=VOID+STORE';
-            const category = document.getElementById('pCategory').value;
-
-            if (name && price && category) {
-                db.ref('products').push({ 
-                    name, 
-                    price, 
-                    img, 
-                    category, 
-                    soldOut: false, // Default produk baru adalah tersedia
-                    timestamp: firebase.database.ServerValue.TIMESTAMP // Untuk urutan terbaru
-                });
-                
-                // Reset form
+            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/600';
+            const category = document.getElementById('pCatSelect').value;
+            if(name && price && category) {
+                db.ref('products').push({ name, price, img, category, soldOut: false });
+                alert("Produk Berhasil Ditambah!");
                 document.getElementById('pName').value = '';
                 document.getElementById('pPrice').value = '';
-                document.getElementById('pImg').value = '';
-                alert("Produk berhasil diposting!");
-            } else {
-                alert("Isi Nama, Harga, dan Kategori!");
             }
         }
 
-        function deleteProduct(key) {
-            if (confirm("Hapus produk ini secara permanen dari database cloud?")) {
-                db.ref('products/' + key).remove();
-            }
+        function updateConfig() {
+            const tele = document.getElementById('cfgTele').value;
+            const wa = document.getElementById('cfgWa').value;
+            const text = document.getElementById('cfgText').value;
+            db.ref('config').set({ tele, wa, text });
+            alert("Pengaturan Cloud Berhasil Diupdate!");
         }
 
-        // Fitur 3: Toggle Status Sold Out
-        function toggleSoldOut(key, currentStatus) {
-            // Ubah status ke kebalikannya (true jadi false, vice versa)
-            db.ref('products/' + key).update({ soldOut: !currentStatus });
+        function deleteItem(key) { if(confirm("Hapus produk?")) db.ref('products/'+key).remove(); }
+        function toggleSold(key, status) { db.ref('products/'+key).update({ soldOut: !status }); }
+        
+        function changeTab(t) {
+            currentTab = t;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+            event.target.classList.add('tab-active');
+            render();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val;
+            render();
         }
     </script>
 </body>
