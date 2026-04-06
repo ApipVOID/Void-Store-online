@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID STORE | Web Jualan by APIP</title>
+    <title>VOID STORE | Unlimited Void expansion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -11,145 +11,168 @@
 
     <style>
         :root { --purple-void: #a0f; }
-        body { background-color: #000; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        
+        /* TOTAL VOID BACKGROUND SYSTEM */
+        body { 
+            background-color: #000; 
+            color: white; 
+            font-family: 'Space Grotesk', sans-serif; 
+            min-height: 100vh; 
+            margin: 0;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-tap-highlight-color: transparent; 
+        }
 
-        /* --- UNLIMITED VOID CORE ENGINE --- */
-        .unlimited-void-container {
+        /* Layer 1: Animasi Partikel Melayang (Mugen/Infinite) */
+        .void-particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://i.ibb.co/5G7y8yM/void-particles.png'); /* Partikel debu kosmik hitam-putih */
+            opacity: 0.25;
+            animation: drift 70s linear infinite;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* Layer 2: Efek Cahaya Ungu di Tengah (Domain Expansion) */
+        .void-bg-gradient {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden; background: #000;
+            background: radial-gradient(circle at center, rgba(160, 0, 255, 0.06) 0%, transparent 75%);
+            z-index: -1; pointer-events: none;
         }
 
-        /* Efek Mata Raksasa (The Eye) */
-        .void-eye {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 800px; height: 800px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(160,0,255,0.1) 30%, transparent 70%);
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            filter: blur(60px);
-            animation: pulse-eye 10s ease-in-out infinite;
-        }
-
-        /* Pola Fraktal/Distorsi Ruang */
-        .void-fractal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
-            opacity: 0.4; mix-blend-mode: overlay;
-        }
-
-        /* Partikel Infinite melayang */
-        .particles {
-            position: absolute; top: 0; left: 0; width: 100%; height: 200%;
-            background: url('https://i.ibb.co/5G7y8yM/void-particles.png');
-            opacity: 0.3;
-            animation: move-particles 40s linear infinite;
-        }
-
-        @keyframes pulse-eye {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
-        }
-
-        @keyframes move-particles {
+        @keyframes drift {
             from { transform: translateY(0); }
-            to { transform: translateY(-50%); }
+            to { transform: translateY(-1000px); }
         }
 
-        /* --- UI STYLING --- */
-        .glow-text { 
-            text-shadow: 0 0 20px var(--purple-void), 0 0 40px rgba(160, 0, 255, 0.4); 
-            background: linear-gradient(to bottom, #fff, var(--purple-void));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        .glow-text { text-shadow: 0 0 15px var(--purple-void), 0 0 30px rgba(160, 0, 255, 0.6); }
 
+        /* KARTU VOID - Mobile-Responsive Glassmorphism */
         .void-card { 
-            background: rgba(0, 0, 0, 0.5); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: 0.4s;
+            background: rgba(10, 10, 10, 0.6); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(160, 0, 255, 0.15);
+            box-shadow: inset 0 0 15px rgba(160, 0, 255, 0.03);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .void-card:hover {
+            transform: translateY(-5px) scale(1.01);
             border-color: var(--purple-void);
-            box-shadow: 0 0 30px rgba(160, 0, 255, 0.2);
-            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(160, 0, 255, 0.3);
+            background: rgba(15, 0, 30, 0.8);
         }
 
+        /* HD IMAGE FIX - Responsif */
         .product-img {
-            width: 100%; height: 180px; object-fit: cover; border-radius: 1rem;
+            width: 100%; height: 180px; object-fit: cover; border-radius: 1.2rem;
             filter: contrast(1.1) brightness(1.1);
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        @media (min-width: 768px) { .product-img { height: 240px; } }
+        @media (min-width: 768px) { .product-img { height: 250px; } }
 
-        .tab-active { background: var(--purple-void) !important; color: white !important; box-shadow: 0 0 15px var(--purple-void); }
-        .is-sold-out { opacity: 0.5; filter: grayscale(1); }
+        /* TOMBOL TAB SCROLLABLE DI HP (Scrollbar Hapus) */
+        .tabs-wrapper {
+            display: flex; overflow-x: auto; white-space: nowrap; gap: 8px; padding-bottom: 10px;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+        .tab-active { background: var(--purple-void) !important; color: white !important; box-shadow: 0 0 15px var(--purple-void); border-color: var(--purple-void) !important; }
+
+        .sold-out-badge { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg);
+            background: var(--purple-void); color: white; padding: 4px 12px; font-weight: bold;
+            border: 1px solid white; z-index: 20; font-size: 10px; box-shadow: 0 0 15px var(--purple-void);
+        }
+
+        .is-sold-out img { filter: grayscale(100%) brightness(0.2) !important; }
+        .is-sold-out .void-card { opacity: 0.8; }
         .hidden { display: none !important; }
+        
+        /* Scrollbar Halus untuk Admin Panel i3 */
+        #adminCatList::-webkit-scrollbar { width: 4px; }
+        #adminCatList::-webkit-scrollbar-thumb { background: #111; border-radius: 4px; }
+        #adminCatList::-webkit-scrollbar-thumb:hover { background: var(--purple-void); }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="unlimited-void-container">
-        <div class="void-eye"></div>
-        <div class="void-fractal"></div>
-        <div class="particles"></div>
+    <div class="void-particles"></div>
+    <div class="void-bg-gradient"></div>
+
+    <div class="flex justify-end mb-4 relative z-10">
+        <button onclick="showLogin()" id="loginBtn" class="text-[8px] border border-gray-800 px-3 py-1.5 rounded-full text-gray-600 uppercase tracking-widest active:scale-95 hover:border-purple-500 transition backdrop-blur-md">
+            Terminal Access
+        </button>
     </div>
 
     <header class="text-center mb-12 relative z-10">
-        <div class="flex justify-end mb-6">
-            <button onclick="showLogin()" id="loginBtn" class="text-[8px] border border-white/20 px-3 py-1.5 rounded-full text-gray-400 uppercase tracking-widest hover:border-purple-500 transition">Terminal</button>
-        </div>
-        
-        <h1 class="text-6xl md:text-8xl font-bold glow-text mb-2 italic tracking-tighter uppercase">Void Store</h1>
-        <p class="text-purple-400 text-[9px] tracking-[0.8em] uppercase mb-10">Absolute Infinity</p>
+        <h1 class="text-5xl md:text-8xl font-bold glow-text mb-1 italic uppercase tracking-tighter">Void Store</h1>
+        <p class="text-purple-400 text-[8px] tracking-[0.7em] uppercase mb-10 opacity-70">Unlimited Void expansion</p>
         
         <div class="max-w-xl mx-auto mb-8 px-4">
-            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Enter the void..." class="w-full bg-white/5 border-b border-white/10 p-4 outline-none focus:border-purple-500 transition text-white text-center text-lg">
+            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Search artifact..." class="w-full bg-transparent border-b-2 border-white/10 p-4 outline-none focus:border-purple-500 transition text-white text-center text-lg font-light">
         </div>
 
-        <div class="flex overflow-x-auto justify-start md:justify-center gap-2 no-scrollbar" id="tabsContainer"></div>
+        <div class="tabs-wrapper md:justify-center" id="tabsContainer"></div>
     </header>
 
-    <main id="catalog" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-24 relative z-10"></main>
-
-    <div id="loginModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-2xl">
-        <div class="void-card p-10 rounded-[2.5rem] w-full max-w-xs border-t-2 border-purple-600">
-            <h2 class="text-xl font-bold mb-8 text-center tracking-widest">AUTHENTICATE</h2>
-            <div class="space-y-4">
-                <input type="text" id="userIn" placeholder="Admin ID" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
-                <input type="password" id="passIn" placeholder="Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none">
-                <button onclick="attemptLogin()" class="w-full bg-purple-600 text-white font-bold py-4 rounded-xl">SYNC</button>
-                <button onclick="hideLogin()" class="w-full text-gray-600 text-xs py-2">Abort</button>
+    <div id="loginModal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl">
+        <div class="void-card p-10 rounded-[2.5rem] w-full max-w-xs border-t-2 border-purple-600 shadow-2xl">
+            <h2 class="text-xl font-bold mb-8 text-center tracking-tighter glow-text uppercase">Authenticate</h2>
+            <div class="space-y-4 text-sm">
+                <input type="text" id="userIn" placeholder="User ID" class="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-purple-500">
+                <input type="password" id="passIn" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-purple-500">
+                <button onclick="attemptLogin()" class="w-full bg-purple-600 text-white font-bold py-3.5 rounded-xl active:scale-95 transition shadow-lg">ENTER VOID</button>
+                <button onclick="hideLogin()" class="w-full text-gray-600 text-[10px] py-2 uppercase tracking-widest">Abort</button>
             </div>
         </div>
     </div>
 
-    <section id="adminPanel" class="max-w-6xl mx-auto mb-16 p-6 void-card rounded-[2rem] hidden border-t-2 border-purple-600 relative z-10">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Master Control</h2>
-            <button onclick="logout()" class="text-red-500 text-[10px]">OFF</button>
+    <section id="adminPanel" class="max-w-6xl mx-auto mb-16 p-6 void-card rounded-[2.5rem] hidden border-t-2 border-purple-600 relative z-10">
+        <div class="flex justify-between items-center mb-8 pb-3 border-b border-white/10">
+            <h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest italic">Expansion Control</h2>
+            <button onclick="logout()" class="text-red-500 text-[10px] font-bold border border-red-900/20 px-3 py-1.5 rounded-xl active:opacity-70">DISCONNECT</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
             <div class="space-y-3">
-                <input type="text" id="pName" placeholder="Name" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg">
-                <input type="text" id="pPrice" placeholder="Price" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg">
-                <input type="text" id="pImg" placeholder="Image Link" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg">
-                <select id="pCatSelect" class="w-full bg-black border border-white/10 p-2 rounded-lg"></select>
-                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-2 rounded-lg">UPLOAD</button>
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Post Item</p>
+                <input type="text" id="pName" placeholder="Name" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm focus:border-purple-500">
+                <input type="text" id="pPrice" placeholder="Price (150k)" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
+                <input type="text" id="pImg" placeholder="HD Image Link" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
+                <select id="pCatSelect" class="w-full bg-black border border-white/10 p-2.5 rounded-lg outline-none text-gray-400"></select>
+                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-2.5 rounded-lg hover:bg-purple-600 hover:text-white transition uppercase text-[11px]">UPLOAD TO VOID</button>
             </div>
-            <div class="space-y-2" id="adminCatList"></div>
-            <div class="space-y-2">
-                <input type="text" id="cfgTele" class="w-full bg-white/5 p-2 rounded-lg text-[9px]">
-                <input type="text" id="cfgWa" class="w-full bg-white/5 p-2 rounded-lg text-[9px]">
-                <button onclick="updateConfig()" class="w-full border border-purple-500 text-purple-500 py-2 rounded-lg text-[9px]">SYNC CONFIG</button>
+            <div class="space-y-3">
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Artifact categories</p>
+                <div class="flex gap-2">
+                    <input type="text" id="newCatName" placeholder="New category..." class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
+                    <button onclick="addCategory()" class="bg-purple-600 px-4 rounded-lg font-bold active:scale-95">+</button>
+                </div>
+                <div id="adminCatList" class="space-y-1.5 max-h-40 overflow-y-auto pr-2 mt-2"></div>
+            </div>
+            <div class="space-y-3">
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Global Config</p>
+                <input type="text" id="cfgTele" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
+                <input type="text" id="cfgWa" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
+                <input type="text" id="cfgText" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
+                <button onclick="updateConfig()" class="w-full border border-purple-500 text-purple-500 py-2.5 rounded-lg text-[10px] uppercase font-bold hover:bg-purple-500 hover:text-white transition">SYNC SYSTEM</button>
             </div>
         </div>
     </section>
 
+    <main id="catalog" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-24 relative z-10"></main>
+
+    <footer class="py-16 text-center border-t border-white/5 relative z-10">
+        <p class="text-gray-800 text-[9px] tracking-[0.6em] uppercase italic">Void Store by Apip • 2026</p>
+    </footer>
+
     <script>
-        // FIREBASE SETUP
+        // SAMA SEPERTI SEBELUMNYA, PASTIKAN FIREBASE CONFIG TETAP TERISI
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -159,35 +182,44 @@
             messagingSenderId: "210609106495",
             appId: "1:210609106495:web:d3d6d31d9ca8427c48928a"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let isAdmin = false, masterData = null, categories = {}, shopConfig = { tele: 'apipvoid', wa: '628', text: 'Order' }, currentTab = 'all', searchQuery = '';
 
+        // LOGIN SYSTEM
         function showLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
         function hideLogin() { document.getElementById('loginModal').classList.add('hidden'); }
+
         function attemptLogin() {
             if(document.getElementById('userIn').value === "admin9080" && document.getElementById('passIn').value === "9080") {
-                isAdmin = true; document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('loginBtn').classList.add('hidden'); hideLogin(); render();
-            } else { alert("VOID REJECTED"); }
+                isAdmin = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('loginBtn').classList.add('hidden');
+                hideLogin(); render();
+            } else { alert("VOIDED / RESTRICTED KEY"); }
         }
+
         function logout() { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('loginBtn').classList.remove('hidden'); render(); }
 
-        db.ref('config').on('value', snap => { if(snap.val()) shopConfig = snap.val(); render(); });
+        // DATABASE LISTENERS
+        db.ref('config').on('value', snap => { if(snap.val()) { shopConfig = snap.val(); document.getElementById('cfgTele').value=shopConfig.tele; document.getElementById('cfgWa').value=shopConfig.wa; document.getElementById('cfgText').value=shopConfig.text; render(); } });
         db.ref('categories').on('value', snap => { categories = snap.val() || {}; updateCategoryUI(); });
         db.ref('products').on('value', snap => { masterData = snap.val(); render(); });
 
         function updateCategoryUI() {
             const tabs = document.getElementById('tabsContainer');
             const select = document.getElementById('pCatSelect');
-            tabs.innerHTML = `<button onclick="changeTab('all', event)" class="tab-btn tab-active px-5 py-2 rounded-full border border-white/10 text-[10px] font-bold uppercase whitespace-nowrap">All</button>`;
-            select.innerHTML = '';
+            const list = document.getElementById('adminCatList');
+            tabs.innerHTML = `<button onclick="changeTab('all', event)" class="tab-btn tab-active px-5 py-1.5 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">All artifact</button>`;
+            select.innerHTML = ''; list.innerHTML = '';
             Object.keys(categories).forEach(key => {
                 const name = categories[key].name;
                 const slug = name.toLowerCase().replace(/\s+/g, '-');
-                tabs.innerHTML += `<button onclick="changeTab('${slug}', event)" class="tab-btn px-5 py-2 rounded-full border border-white/10 text-[10px] font-bold uppercase whitespace-nowrap">${name}</button>`;
+                tabs.innerHTML += `<button onclick="changeTab('${slug}', event)" class="tab-btn px-5 py-1.5 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">${name}</button>`;
                 select.innerHTML += `<option value="${slug}">${name}</option>`;
+                list.innerHTML += `<div class="flex justify-between items-center bg-white/5 p-2 rounded-lg text-[10px]"><span>${name}</span><button onclick="deleteCategory('${key}')" class="text-red-500 active:scale-125 transition">✕</button></div>`;
             });
         }
 
@@ -197,32 +229,39 @@
             Object.keys(masterData).forEach(key => {
                 const item = masterData[key];
                 if((currentTab === 'all' || item.category === currentTab) && item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                    const adminUI = isAdmin ? `
+                        <button onclick="deleteItem('${key}')" class="absolute top-3 right-3 bg-red-600 text-white w-8 h-8 rounded-full z-40 text-xs active:scale-110 flex items-center justify-center">✕</button>
+                        <button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-3 left-3 bg-black/95 border border-purple-500 text-[8px] px-2 py-1 rounded-lg z-40 uppercase font-bold shadow-lg">${item.soldOut ? 'Restore' : 'Sold'}</button>
+                    ` : '';
+
                     catalog.innerHTML += `
-                        <div class="void-card rounded-[2rem] p-4 ${item.soldOut ? 'is-sold-out' : ''} relative">
-                            ${isAdmin ? `<button onclick="deleteItem('${key}')" class="absolute top-2 right-2 bg-red-600 w-7 h-7 rounded-full z-40">✕</button>` : ''}
-                            <img src="${item.img}" class="product-img mb-4" onerror="this.src='https://via.placeholder.com/300x300/000/a0f?text=VOID'">
-                            <h3 class="font-bold mb-1 text-[12px] truncate">${item.name}</h3>
-                            <p class="text-purple-400 font-bold mb-4 text-[11px]">IDR ${item.price}</p>
-                            <a href="https://wa.me/${shopConfig.wa}?text=Order%20${item.name}" target="_blank" class="block bg-white text-black text-center py-2.5 rounded-xl text-[10px] font-bold uppercase">WhatsApp</a>
+                        <div class="void-card rounded-[2rem] p-4 ${item.soldOut ? 'is-sold-out' : ''} relative overflow-hidden group">
+                            ${adminUI}
+                            ${item.soldOut ? '<div class="sold-out-badge">VOID</div>' : ''}
+                            <img src="${item.img}" class="product-img mb-5" onerror="this.src='https://via.placeholder.com/400x400/000/a0f?text=VOID'">
+                            <h3 class="font-bold mb-1 text-[13px] truncate glow-text">${item.name}</h3>
+                            <p class="text-purple-400 font-bold mb-5 text-[12px] italic">IDR ${item.price}</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="bg-[#0088cc] text-center py-3 rounded-2xl text-[9px] font-bold text-white uppercase active:scale-95 transition">Telegram</a>
+                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="bg-[#25d366] text-center py-3 rounded-2xl text-[9px] font-bold text-white uppercase active:scale-95 transition">WhatsApp</a>
+                            </div>
                         </div>
                     `;
                 }
             });
         }
 
-        function addCategory() { const n = document.getElementById('newCatName').value; if(n) db.ref('categories').push({name:n}); }
+        function addCategory() { const n = document.getElementById('newCatName').value; if(n) db.ref('categories').push({name:n}); document.getElementById('newCatName').value=''; }
+        function deleteCategory(k) { if(confirm("Hapus kategori?")) db.ref('categories/'+k).remove(); }
         function addProduct() {
             const n = document.getElementById('pName').value, p = document.getElementById('pPrice').value, i = document.getElementById('pImg').value, c = document.getElementById('pCatSelect').value;
-            if(n && p) db.ref('products').push({name:n, price:p, img:i, category:c, soldOut:false});
+            if(n && p && c) { db.ref('products').push({name:n, price:p, img:i || 'https://via.placeholder.com/400', category:c, soldOut:false}); document.getElementById('pName').value=''; document.getElementById('pPrice').value=''; } else { alert("VOID DATA"); }
         }
         function deleteItem(k) { if(confirm("Hapus?")) db.ref('products/'+k).remove(); }
+        function toggleSold(k, s) { db.ref('products/'+k).update({soldOut: !s}); }
+        function updateConfig() { db.ref('config').set({ tele:document.getElementById('cfgTele').value, wa:document.getElementById('cfgWa').value, text:document.getElementById('cfgText').value }); alert("System Synced!"); }
         function handleSearch(v) { searchQuery = v; render(); }
-        function changeTab(t, e) {
-            currentTab = t;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-            if(e) e.target.classList.add('tab-active');
-            render();
-        }
+        function changeTab(t, e) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active')); if(e) e.target.classList.add('tab-active'); render(); }
     </script>
 </body>
 </html>
