@@ -6,138 +6,152 @@
     <title>VOID STORE | By Apip</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <style>
         :root { --purple-gojo: #a0f; }
         body { background-color: #050505; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; }
         .glow-text { text-shadow: 0 0 15px var(--purple-gojo); }
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(160, 0, 255, 0.2); 
-            transition: 0.4s; 
-        }
-        .btn-tele { background: linear-gradient(45deg, #a0f, #60f); }
-        .btn-delete {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(255, 0, 0, 0.7); color: white;
-            width: 35px; height: 35px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; cursor: pointer; z-index: 50;
-            border: none; transition: 0.3s;
-        }
-        .btn-delete:hover { background: red; transform: scale(1.1); }
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(160, 0, 255, 0.2); transition: 0.4s; }
+        .btn-tele { background: linear-gradient(45deg, #a0f, #60f); transition: 0.3s; }
+        .btn-tele:hover { box-shadow: 0 0 20px var(--purple-gojo); transform: scale(1.02); }
         .hidden { display: none; }
+        input::placeholder { color: #444; }
     </style>
 </head>
 <body class="p-6 md:p-12">
 
     <header class="text-center mb-16">
-        <h1 class="text-6xl font-bold glow-text mb-2 italic">VOID STORE</h1>
-        <p id="adminStatus" class="text-gray-500 text-xs tracking-widest uppercase">Public View</p>
+        <h1 class="text-6xl font-bold glow-text mb-2 italic tracking-tighter uppercase">Void Store</h1>
+        <p id="adminStatus" class="text-gray-500 text-xs tracking-[0.3em] uppercase">Global Online Catalog</p>
     </header>
 
-    <section id="adminPanel" class="max-w-2xl mx-auto mb-20 p-8 glass-card rounded-3xl hidden">
-        <h2 class="text-xl font-bold mb-6 text-purple-400">Admin Mode Activated</h2>
+    <section id="adminPanel" class="max-w-2xl mx-auto mb-20 p-8 glass-card rounded-3xl hidden border-t-2 border-purple-500">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-purple-400 italic">Admin Expansion 🛠️</h2>
+            <button onclick="logoutAdmin()" class="text-gray-500 hover:text-white text-xs">Close</button>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" id="pName" placeholder="Nama Produk..." class="bg-black border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none">
-            <input type="text" id="pPrice" placeholder="Harga (Contoh: 150k)..." class="bg-black border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none">
-            <input type="text" id="pImg" placeholder="Link Gambar (URL)..." class="bg-black border border-gray-800 p-3 rounded-xl md:col-span-2 outline-none">
-            <button onclick="addProduct()" class="md:col-span-2 bg-white text-black font-bold py-3 rounded-xl hover:bg-purple-500 hover:text-white transition uppercase">Simpan Produk</button>
-            <button onclick="logoutAdmin()" class="md:col-span-2 text-gray-500 text-xs mt-2 underline">Keluar Mode Admin</button>
+            <input type="text" id="pName" placeholder="Nama Produk..." class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
+            <input type="text" id="pPrice" placeholder="Harga (misal: 250k)..." class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:border-purple-500 outline-none transition">
+            <input type="text" id="pImg" placeholder="Link Gambar (URL)..." class="bg-black/50 border border-gray-800 p-3 rounded-xl md:col-span-2 outline-none focus:border-purple-500 transition">
+            <button onclick="addProduct()" class="md:col-span-2 bg-white text-black font-black py-4 rounded-xl hover:bg-purple-500 hover:text-white transition-all uppercase tracking-widest active:scale-95">
+                Post to Cloud
+            </button>
         </div>
     </section>
 
-    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></main>
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        </main>
+
+    <footer class="mt-32 text-center text-[10px] text-gray-700 tracking-widest uppercase">
+        Protected by Infinite Void | Press Shift + A to login
+    </footer>
 
     <script>
-        const TELEGRAM_USERNAME = "fyzzrq"; // Ganti ke username Telegram kamu
-        const ADMIN_PASSWORD = "201120"; // Password rahasia kamu
-        
-        let products = JSON.parse(localStorage.getItem('void_store_data')) || [];
-        let isAdminMode = false;
+        // FIREBASE CONFIG KAMU
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
+            authDomain: "voidstore-b995f.firebaseapp.com",
+            databaseURL: "https://voidstore-b995f-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "voidstore-b995f",
+            storageBucket: "voidstore-b995f.firebasestorage.app",
+            messagingSenderId: "210609106495",
+            appId: "1:210609106495:web:d3d6d31d9ca8427c48928a"
+        };
 
-        // FUNGSI 1: Deteksi Login (Shift + A)
+        // Inisialisasi
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const TELEGRAM_USERNAME = "fyzzrq"; // Ganti dengan username Tele kamu
+        const ADMIN_PASSWORD = "201120"; 
+        let isAdminActive = false;
+
+        // 1. Deteksi Login Rahasia
         document.addEventListener('keydown', (e) => {
             if (e.shiftKey && e.key === 'A') {
-                const pass = prompt("Masukkan Password Admin:");
+                const pass = prompt("Masukkan Access Code:");
                 if (pass === ADMIN_PASSWORD) {
-                    isAdminMode = true;
+                    isAdminActive = true;
                     document.getElementById('adminPanel').classList.remove('hidden');
                     document.getElementById('adminStatus').innerText = "ADMIN MODE ACTIVE";
-                    document.getElementById('adminStatus').style.color = "#a0f";
-                    renderProducts();
-                } else {
-                    alert("Password Salah!");
+                    document.getElementById('adminStatus').classList.add('text-purple-500');
+                    renderProducts(); // Refresh untuk munculkan tombol hapus
                 }
             }
         });
 
         function logoutAdmin() {
-            isAdminMode = false;
+            isAdminActive = false;
             document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('adminStatus').innerText = "Public View";
-            document.getElementById('adminStatus').style.color = "#666";
+            document.getElementById('adminStatus').innerText = "Global Online Catalog";
+            document.getElementById('adminStatus').classList.remove('text-purple-500');
             renderProducts();
         }
 
-        // FUNGSI 2: Render Produk (Menampilkan ke Layar)
-        function renderProducts() {
+        // 2. Ambil Data Realtime dari Firebase
+        db.ref('products').on('value', (snapshot) => {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
+            const data = snapshot.val();
 
-            products.forEach((item, index) => {
-                // Tombol Delete hanya muncul jika isAdminMode = true
-                const deleteButton = isAdminMode ? 
-                    `<button class="btn-delete" onclick="deleteItem(${index})">✕</button>` : '';
+            if (data) {
+                Object.keys(data).forEach((key) => {
+                    const item = data[key];
+                    const deleteBtn = isAdminActive ? 
+                        `<button onclick="deleteProduct('${key}')" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white w-10 h-10 rounded-full z-30 transition">✕</button>` : '';
 
-                catalog.innerHTML += `
-                    <div class="glass-card rounded-[2rem] overflow-hidden p-4 relative group">
-                        ${deleteButton}
-                        <img src="${item.img}" class="w-full h-64 object-cover rounded-2xl mb-4 grayscale group-hover:grayscale-0 transition duration-500">
-                        <h3 class="text-xl font-bold mb-1">${item.name}</h3>
-                        <p class="text-purple-500 font-bold mb-4">RP ${item.price}</p>
-                        <a href="https://t.me/${TELEGRAM_USERNAME}?text=Halo, saya mau order ${item.name}" target="_blank" 
-                           class="btn-tele block text-center py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest text-white">
-                           Buy via Telegram
-                        </a>
-                    </div>
-                `;
-            });
-        }
+                    catalog.innerHTML += `
+                        <div class="glass-card rounded-[2rem] overflow-hidden p-5 group relative">
+                            ${deleteBtn}
+                            <div class="overflow-hidden rounded-2xl mb-5 h-64">
+                                <img src="${item.img}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700">
+                            </div>
+                            <h3 class="text-xl font-bold mb-1 tracking-tight">${item.name}</h3>
+                            <p class="text-purple-500 font-bold text-lg mb-6 tracking-tighter">IDR ${item.price}</p>
+                            <a href="https://t.me/${TELEGRAM_USERNAME}?text=Halo, saya mau order ${encodeURIComponent(item.name)}" 
+                               target="_blank" 
+                               class="btn-tele block text-center py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest text-white">
+                               Buy Now
+                            </a>
+                        </div>
+                    `;
+                });
+            } else {
+                catalog.innerHTML = '<p class="col-span-full text-center text-gray-600 py-20 italic">Catalog is empty. Add some drops!</p>';
+            }
+        });
 
-        // FUNGSI 3: Tambah Produk
+        // 3. Tambah Produk ke Firebase
         function addProduct() {
             const name = document.getElementById('pName').value;
             const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/300';
+            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/500x500/0a0a0a/333?text=Void+Store';
 
             if (name && price) {
-                products.push({ name, price, img });
-                saveData();
+                db.ref('products').push({ name, price, img });
+                // Reset form
                 document.getElementById('pName').value = '';
                 document.getElementById('pPrice').value = '';
                 document.getElementById('pImg').value = '';
             } else {
-                alert("Isi nama dan harga produk!");
+                alert("Minimal isi Nama dan Harga!");
             }
         }
 
-        // FUNGSI 4: Hapus Produk (YANG KAMU MINTA)
-        function deleteItem(index) {
-            if (confirm(`Yakin ingin menghapus "${products[index].name}"?`)) {
-                products.splice(index, 1); // Menghapus 1 item dari array berdasarkan index
-                saveData(); // Simpan perubahan ke memori
+        // 4. Hapus Produk dari Firebase
+        function deleteProduct(key) {
+            if (confirm("Hapus produk ini dari database selamanya?")) {
+                db.ref('products/' + key).remove();
             }
         }
 
-        // FUNGSI 5: Simpan ke Memori Browser
-        function saveData() {
-            localStorage.setItem('void_store_data', JSON.stringify(products));
-            renderProducts(); // Update tampilan layar secara otomatis
+        function renderProducts() {
+            // Pemanggilan ulang database sudah otomatis via db.ref().on()
         }
-
-        // Jalankan saat pertama kali buka
-        window.onload = renderProducts;
     </script>
 </body>
 </html>
