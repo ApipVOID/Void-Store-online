@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID STORE | Dynamic Category Edition</title>
+    <title>VOID STORE | Admin Login Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -24,6 +24,12 @@
 </head>
 <body class="p-4 md:p-10">
 
+    <div class="flex justify-end mb-4">
+        <button onclick="showLoginModal()" id="loginBtn" class="text-[10px] border border-gray-800 px-4 py-2 rounded-full hover:border-purple-500 transition uppercase tracking-widest text-gray-500">
+            Admin Login
+        </button>
+    </div>
+
     <header class="text-center mb-10">
         <h1 class="text-6xl font-bold glow-text mb-4 italic tracking-tighter uppercase">Void Store</h1>
         
@@ -31,43 +37,52 @@
             <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Cari barang..." class="w-full bg-black border border-gray-800 p-4 rounded-2xl outline-none focus:border-purple-500 transition text-white">
         </div>
 
-        <div class="flex flex-wrap justify-center gap-2 mb-10" id="tabsContainer">
-            </div>
+        <div class="flex flex-wrap justify-center gap-2 mb-10" id="tabsContainer"></div>
     </header>
+
+    <div id="loginModal" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-3xl w-full max-w-sm border-t-2 border-purple-500">
+            <h2 class="text-2xl font-bold mb-6 text-center italic">ADMIN ACCESS</h2>
+            <div class="space-y-4">
+                <input type="text" id="userIn" placeholder="Username" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none focus:border-purple-500">
+                <input type="password" id="passIn" placeholder="Password" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none focus:border-purple-500">
+                <button onclick="attemptLogin()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-purple-500 hover:text-white transition">LOGIN</button>
+                <button onclick="hideLoginModal()" class="w-full text-gray-500 text-xs py-2">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <section id="adminPanel" class="max-w-5xl mx-auto mb-16 p-6 glass-card rounded-3xl hidden border-t-2 border-purple-500 shadow-2xl">
         <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-800">
-            <h2 class="text-xl font-bold text-purple-400 italic">ADMIN EXPANSION 🛠️</h2>
-            <button onclick="toggleAdmin(false)" class="text-gray-500 hover:text-white text-xs border border-gray-800 px-3 py-1 rounded-lg">Exit</button>
+            <h2 class="text-xl font-bold text-purple-400 italic">ADMIN DASHBOARD</h2>
+            <button onclick="logout()" class="text-red-500 text-xs border border-red-900/30 px-3 py-1 rounded-lg hover:bg-red-950/30">Logout</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="space-y-3">
                 <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Tambah Produk</p>
-                <input type="text" id="pName" placeholder="Nama Produk" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none focus:border-purple-500">
-                <input type="text" id="pPrice" placeholder="Harga (250k)" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
+                <input type="text" id="pName" placeholder="Nama Produk" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
+                <input type="text" id="pPrice" placeholder="Harga" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
                 <input type="text" id="pImg" placeholder="Link Gambar" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none">
-                <select id="pCatSelect" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none text-gray-400">
-                    </select>
-                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-purple-500 hover:text-white transition">POST PRODUCT</button>
+                <select id="pCatSelect" class="w-full bg-black border border-gray-800 p-3 rounded-xl outline-none text-gray-400"></select>
+                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-3 rounded-xl">POST PRODUCT</button>
             </div>
 
             <div class="space-y-3 p-4 bg-white/5 rounded-2xl border border-white/5">
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Manajemen Kategori</p>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Kategori</p>
                 <div class="flex gap-2">
-                    <input type="text" id="newCatName" placeholder="Nama Kategori..." class="w-full bg-black border border-gray-800 p-2 rounded-lg text-sm outline-none">
+                    <input type="text" id="newCatName" placeholder="Nama baru..." class="w-full bg-black border border-gray-800 p-2 rounded-lg text-sm">
                     <button onclick="addCategory()" class="bg-purple-600 px-4 rounded-lg font-bold">+</button>
                 </div>
-                <div id="adminCatList" class="text-[10px] space-y-1 max-h-32 overflow-y-auto">
-                    </div>
+                <div id="adminCatList" class="text-[10px] space-y-1"></div>
             </div>
 
             <div class="space-y-3 p-4 bg-purple-900/10 rounded-2xl">
-                <p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Shop Config</p>
-                <input type="text" id="cfgTele" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
-                <input type="text" id="cfgWa" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
-                <input type="text" id="cfgText" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs outline-none">
-                <button onclick="updateConfig()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-[10px] tracking-widest">UPDATE SETTINGS</button>
+                <p class="text-xs font-bold text-purple-400 uppercase tracking-widest">Config</p>
+                <input type="text" id="cfgTele" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs">
+                <input type="text" id="cfgWa" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs">
+                <input type="text" id="cfgText" class="w-full bg-black border border-gray-800 p-2 rounded-lg text-xs">
+                <button onclick="updateConfig()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-[10px]">UPDATE SETTINGS</button>
             </div>
         </div>
     </section>
@@ -95,12 +110,36 @@
         let isAdmin = false;
         let masterData = null;
         let categories = {};
-        let shopConfig = { tele: 'apipvoid', wa: '628123', text: 'Order' };
+        let shopConfig = { tele: 'apipvoid', wa: '628', text: 'Order' };
         let currentTab = 'all';
         let searchQuery = '';
 
-        // --- FIREBASE LISTENERS ---
+        // LOGIN SYSTEM
+        function showLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
+        function hideLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
 
+        function attemptLogin() {
+            const u = document.getElementById('userIn').value;
+            const p = document.getElementById('passIn').value;
+            if(u === "admin9080" && p === "9080") {
+                isAdmin = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('loginBtn').classList.add('hidden');
+                hideLoginModal();
+                render();
+            } else {
+                alert("Salah User/Password!");
+            }
+        }
+
+        function logout() {
+            isAdmin = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+            render();
+        }
+
+        // FIREBASE LISTENERS
         db.ref('config').on('value', snap => {
             if(snap.val()) {
                 shopConfig = snap.val();
@@ -121,29 +160,18 @@
             render();
         });
 
-        // --- FUNCTIONS ---
-
         function updateCategoryUI() {
-            const tabsContainer = document.getElementById('tabsContainer');
-            const selectContainer = document.getElementById('pCatSelect');
-            const adminCatList = document.getElementById('adminCatList');
-
-            tabsContainer.innerHTML = `<button onclick="changeTab('all')" class="tab-btn tab-active px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase transition">Semua</button>`;
-            selectContainer.innerHTML = '';
-            adminCatList.innerHTML = '';
-
+            const tabs = document.getElementById('tabsContainer');
+            const select = document.getElementById('pCatSelect');
+            const list = document.getElementById('adminCatList');
+            tabs.innerHTML = `<button onclick="changeTab('all')" class="tab-btn tab-active px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase">Semua</button>`;
+            select.innerHTML = ''; list.innerHTML = '';
             Object.keys(categories).forEach(key => {
-                const catName = categories[key].name;
-                const catSlug = catName.toLowerCase().replace(/\s+/g, '-');
-
-                // Ke Halaman Depan (Tabs)
-                tabsContainer.innerHTML += `<button onclick="changeTab('${catSlug}')" class="tab-btn px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase transition">${catName}</button>`;
-                
-                // Ke Pilihan Admin (Select)
-                selectContainer.innerHTML += `<option value="${catSlug}">${catName}</option>`;
-
-                // Ke Daftar Admin (Hapus)
-                adminCatList.innerHTML += `<div class="flex justify-between bg-white/5 p-1 px-2 rounded"><span>${catName}</span><button onclick="deleteCategory('${key}')" class="text-red-500">Hapus</button></div>`;
+                const name = categories[key].name;
+                const slug = name.toLowerCase().replace(/\s+/g, '-');
+                tabs.innerHTML += `<button onclick="changeTab('${slug}')" class="tab-btn px-5 py-2 rounded-full border border-gray-800 text-xs font-bold uppercase">${name}</button>`;
+                select.innerHTML += `<option value="${slug}">${name}</option>`;
+                list.innerHTML += `<div class="flex justify-between bg-white/5 p-1 px-2 rounded"><span>${name}</span><button onclick="deleteCategory('${key}')" class="text-red-500">✕</button></div>`;
             });
         }
 
@@ -151,26 +179,21 @@
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
             if(!masterData) return;
-
             Object.keys(masterData).forEach(key => {
                 const item = masterData[key];
-                const matchesTab = currentTab === 'all' || item.category === currentTab;
-                const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-                if(matchesTab && matchesSearch) {
-                    const delBtn = isAdmin ? `<button onclick="deleteItem('${key}')" class="absolute top-2 right-2 bg-red-600 text-white w-8 h-8 rounded-full z-30">✕</button>` : '';
-                    const sldBtn = isAdmin ? `<button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-2 left-2 bg-gray-800 text-[10px] px-2 py-1 rounded-lg z-30">${item.soldOut ? 'Available' : 'Sold Out'}</button>` : '';
-                    
+                if((currentTab === 'all' || item.category === currentTab) && item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+                    const del = isAdmin ? `<button onclick="deleteItem('${key}')" class="absolute top-2 right-2 bg-red-600 text-white w-7 h-7 rounded-full z-30">✕</button>` : '';
+                    const sld = isAdmin ? `<button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-2 left-2 bg-gray-800 text-[9px] px-2 py-1 rounded-lg z-30">${item.soldOut ? 'Available' : 'Sold Out'}</button>` : '';
                     catalog.innerHTML += `
                         <div class="glass-card rounded-[2rem] p-4 relative overflow-hidden group ${item.soldOut ? 'is-sold-out' : ''}">
-                            ${delBtn} ${sldBtn}
+                            ${del} ${sld}
                             ${item.soldOut ? '<div class="sold-out-badge"><span class="font-bold border-2 border-white px-3 py-1 rotate-[-10deg]">SOLD OUT</span></div>' : ''}
-                            <img src="${item.img}" class="w-full h-60 object-cover rounded-2xl mb-4 group-hover:scale-105 transition duration-500">
+                            <img src="${item.img}" class="w-full h-60 object-cover rounded-2xl mb-4 transition duration-500">
                             <h3 class="font-bold mb-1">${item.name}</h3>
                             <p class="text-purple-500 font-bold mb-4">IDR ${item.price}</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-tele text-center py-2 rounded-xl text-[10px] font-bold text-white uppercase">Telegram</a>
-                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-wa text-center py-2 rounded-xl text-[10px] font-bold text-white uppercase">WhatsApp</a>
+                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-tele text-center py-3 rounded-xl text-[9px] font-bold text-white uppercase">Telegram</a>
+                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-wa text-center py-3 rounded-xl text-[9px] font-bold text-white uppercase">WhatsApp</a>
                             </div>
                         </div>
                     `;
@@ -178,67 +201,21 @@
             });
         }
 
-        // --- ADMIN OPERATIONS ---
-
-        document.addEventListener('keydown', e => {
-            if(e.shiftKey && e.key === 'A') {
-                if(prompt("Code:") === "gojo") toggleAdmin(true);
-            }
-        });
-
-        function toggleAdmin(status) {
-            isAdmin = status;
-            document.getElementById('adminPanel').classList.toggle('hidden', !status);
-            render();
-        }
-
-        function addCategory() {
-            const name = document.getElementById('newCatName').value;
-            if(name) {
-                db.ref('categories').push({ name: name });
-                document.getElementById('newCatName').value = '';
-            }
-        }
-
-        function deleteCategory(key) {
-            if(confirm("Hapus kategori ini? Produk dengan kategori ini tidak akan hilang, tapi tidak akan muncul di filter.")) {
-                db.ref('categories/' + key).remove();
-            }
-        }
-
+        // ADMIN FUNCTIONS
+        function addCategory() { const n = document.getElementById('newCatName').value; if(n) db.ref('categories').push({name:n}); document.getElementById('newCatName').value=''; }
+        function deleteCategory(k) { if(confirm("Hapus kategori?")) db.ref('categories/'+k).remove(); }
         function addProduct() {
-            const name = document.getElementById('pName').value;
-            const price = document.getElementById('pPrice').value;
-            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/600';
-            const category = document.getElementById('pCatSelect').value;
-            if(name && price && category) {
-                db.ref('products').push({ name, price, img, category, soldOut: false });
-                alert("Produk Berhasil Ditambah!");
-                document.getElementById('pName').value = '';
-                document.getElementById('pPrice').value = '';
-            }
+            const n = document.getElementById('pName').value, p = document.getElementById('pPrice').value, i = document.getElementById('pImg').value, c = document.getElementById('pCatSelect').value;
+            if(n && p && c) { db.ref('products').push({name:n, price:p, img:i, category:c, soldOut:false}); alert("Posted!"); document.getElementById('pName').value=''; document.getElementById('pPrice').value=''; }
         }
-
-        function updateConfig() {
-            const tele = document.getElementById('cfgTele').value;
-            const wa = document.getElementById('cfgWa').value;
-            const text = document.getElementById('cfgText').value;
-            db.ref('config').set({ tele, wa, text });
-            alert("Pengaturan Cloud Berhasil Diupdate!");
-        }
-
-        function deleteItem(key) { if(confirm("Hapus produk?")) db.ref('products/'+key).remove(); }
-        function toggleSold(key, status) { db.ref('products/'+key).update({ soldOut: !status }); }
-        
+        function updateConfig() { db.ref('config').set({ tele:document.getElementById('cfgTele').value, wa:document.getElementById('cfgWa').value, text:document.getElementById('cfgText').value }); alert("Updated!"); }
+        function deleteItem(k) { if(confirm("Hapus?")) db.ref('products/'+k).remove(); }
+        function toggleSold(k,s) { db.ref('products/'+k).update({soldOut:!s}); }
+        function handleSearch(v) { searchQuery = v; render(); }
         function changeTab(t) {
             currentTab = t;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
             event.target.classList.add('tab-active');
-            render();
-        }
-
-        function handleSearch(val) {
-            searchQuery = val;
             render();
         }
     </script>
