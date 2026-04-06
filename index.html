@@ -3,176 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VOID STORE | Unlimited Void expansion</title>
+    <title>VOID STORE | Unlimited Expansion</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --purple-void: #a0f; }
+        :root { --gojo-purple: #a0f; --void-black: #050505; }
         
-        /* TOTAL VOID BACKGROUND SYSTEM */
         body { 
-            background-color: #000; 
+            background-color: var(--void-black); 
             color: white; 
             font-family: 'Space Grotesk', sans-serif; 
-            min-height: 100vh; 
-            margin: 0;
+            margin: 0; 
             overflow-x: hidden;
-            position: relative;
-            -webkit-tap-highlight-color: transparent; 
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Layer 1: Animasi Partikel Melayang (Mugen/Infinite) */
-        .void-particles {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://i.ibb.co/5G7y8yM/void-particles.png'); /* Partikel debu kosmik hitam-putih */
-            opacity: 0.25;
-            animation: drift 70s linear infinite;
-            z-index: -2;
-            pointer-events: none;
-        }
-
-        /* Layer 2: Efek Cahaya Ungu di Tengah (Domain Expansion) */
-        .void-bg-gradient {
+        /* --- UNLIMITED VOID BACKGROUND SYSTEM --- */
+        .void-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(160, 0, 255, 0.06) 0%, transparent 75%);
-            z-index: -1; pointer-events: none;
+            z-index: -1; overflow: hidden; background: #000;
         }
 
-        @keyframes drift {
-            from { transform: translateY(0); }
-            to { transform: translateY(-1000px); }
+        /* The Eye of Void (Gojo Style) */
+        .void-eye {
+            position: absolute; top: 40%; left: 50%;
+            width: 90vw; height: 90vw; max-width: 800px; max-height: 800px;
+            background: 
+                radial-gradient(circle at center, #fff 0%, transparent 10%),
+                radial-gradient(circle at center, var(--gojo-purple) 0%, transparent 45%),
+                radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            filter: blur(50px);
+            opacity: 0.6;
+            animation: pulse-eye 10s ease-in-out infinite;
         }
 
-        .glow-text { text-shadow: 0 0 15px var(--purple-void), 0 0 30px rgba(160, 0, 255, 0.6); }
+        /* Fractal Expansion Lines */
+        .void-lines {
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: repeating-radial-gradient(circle at center, 
+                transparent 0, transparent 25px, 
+                rgba(160, 0, 255, 0.05) 26px, rgba(160, 0, 255, 0.05) 27px);
+            animation: rotate-void 150s linear infinite;
+            opacity: 0.4;
+        }
 
-        /* KARTU VOID - Mobile-Responsive Glassmorphism */
+        @keyframes pulse-eye {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+        }
+
+        @keyframes rotate-void {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- UI COMPONENTS --- */
+        .glow-text { 
+            text-shadow: 0 0 20px var(--gojo-purple), 0 0 40px rgba(160, 0, 255, 0.5); 
+            background: linear-gradient(to bottom, #fff, #a0f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .void-card { 
-            background: rgba(10, 10, 10, 0.6); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(10, 10, 10, 0.55); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(160, 0, 255, 0.15);
-            box-shadow: inset 0 0 15px rgba(160, 0, 255, 0.03);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .void-card:hover {
-            transform: translateY(-5px) scale(1.01);
-            border-color: var(--purple-void);
-            box-shadow: 0 0 30px rgba(160, 0, 255, 0.3);
-            background: rgba(15, 0, 30, 0.8);
+            transform: translateY(-8px);
+            border-color: var(--gojo-purple);
+            box-shadow: 0 0 30px rgba(160, 0, 255, 0.2);
         }
 
-        /* HD IMAGE FIX - Responsif */
         .product-img {
-            width: 100%; height: 180px; object-fit: cover; border-radius: 1.2rem;
-            filter: contrast(1.1) brightness(1.1);
-            border: 1px solid rgba(255,255,255,0.05);
+            width: 100%; height: 200px; object-fit: cover; border-radius: 1.25rem;
+            filter: contrast(1.1) brightness(1.05);
         }
 
-        @media (min-width: 768px) { .product-img { height: 250px; } }
+        @media (min-width: 768px) { .product-img { height: 260px; } }
 
-        /* TOMBOL TAB SCROLLABLE DI HP (Scrollbar Hapus) */
-        .tabs-wrapper {
-            display: flex; overflow-x: auto; white-space: nowrap; gap: 8px; padding-bottom: 10px;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .tabs-wrapper::-webkit-scrollbar { display: none; }
-
-        .tab-active { background: var(--purple-void) !important; color: white !important; box-shadow: 0 0 15px var(--purple-void); border-color: var(--purple-void) !important; }
-
-        .sold-out-badge { 
+        /* Sold Out States */
+        .is-sold-out { filter: grayscale(1) opacity(0.6); }
+        .sold-badge {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg);
-            background: var(--purple-void); color: white; padding: 4px 12px; font-weight: bold;
-            border: 1px solid white; z-index: 20; font-size: 10px; box-shadow: 0 0 15px var(--purple-void);
+            background: var(--gojo-purple); color: white; padding: 6px 20px;
+            font-weight: 900; border: 2px solid white; z-index: 30;
+            box-shadow: 0 0 20px var(--gojo-purple); font-size: 14px;
         }
 
-        .is-sold-out img { filter: grayscale(100%) brightness(0.2) !important; }
-        .is-sold-out .void-card { opacity: 0.8; }
-        .hidden { display: none !important; }
+        /* Navigation Tabs */
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn { transition: 0.3s; white-space: nowrap; }
+        .tab-active { 
+            background: var(--gojo-purple) !important; 
+            box-shadow: 0 0 15px var(--gojo-purple); 
+            border-color: var(--gojo-purple) !important;
+            color: white !important;
+        }
+
+        /* Admin Controls */
+        .admin-only { display: none; }
+        body.admin-mode .admin-only { display: block; }
         
-        /* Scrollbar Halus untuk Admin Panel i3 */
-        #adminCatList::-webkit-scrollbar { width: 4px; }
-        #adminCatList::-webkit-scrollbar-thumb { background: #111; border-radius: 4px; }
-        #adminCatList::-webkit-scrollbar-thumb:hover { background: var(--purple-void); }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div class="void-particles"></div>
-    <div class="void-bg-gradient"></div>
+    <div class="void-container">
+        <div class="void-lines"></div>
+        <div class="void-eye"></div>
+    </div>
 
-    <div class="flex justify-end mb-4 relative z-10">
-        <button onclick="showLogin()" id="loginBtn" class="text-[8px] border border-gray-800 px-3 py-1.5 rounded-full text-gray-600 uppercase tracking-widest active:scale-95 hover:border-purple-500 transition backdrop-blur-md">
+    <div class="flex justify-end mb-6 relative z-50">
+        <button onclick="toggleLoginModal()" id="loginBtn" class="text-[9px] border border-white/10 px-4 py-2 rounded-full text-gray-500 uppercase tracking-[0.2em] hover:border-purple-500 hover:text-white transition">
             Terminal Access
+        </button>
+        <button onclick="logout()" id="logoutBtn" class="hidden text-[9px] border border-red-500/50 px-4 py-2 rounded-full text-red-500 uppercase tracking-[0.2em]">
+            Disconnect
         </button>
     </div>
 
-    <header class="text-center mb-12 relative z-10">
-        <h1 class="text-5xl md:text-8xl font-bold glow-text mb-1 italic uppercase tracking-tighter">Void Store</h1>
-        <p class="text-purple-400 text-[8px] tracking-[0.7em] uppercase mb-10 opacity-70">Unlimited Void expansion</p>
+    <header class="text-center mb-12 relative z-40">
+        <h1 class="text-6xl md:text-9xl font-bold glow-text mb-2 italic uppercase tracking-tighter">Void Store</h1>
+        <p class="text-purple-400 text-[9px] md:text-[11px] tracking-[1em] uppercase mb-12 opacity-80">Unlimited Expansion System</p>
         
-        <div class="max-w-xl mx-auto mb-8 px-4">
-            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Search artifact..." class="w-full bg-transparent border-b-2 border-white/10 p-4 outline-none focus:border-purple-500 transition text-white text-center text-lg font-light">
+        <div class="max-w-2xl mx-auto mb-10 px-4">
+            <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search artifacts..." class="w-full bg-transparent border-b-2 border-white/10 p-4 outline-none focus:border-purple-500 transition text-white text-center text-xl font-light">
         </div>
 
-        <div class="tabs-wrapper md:justify-center" id="tabsContainer"></div>
+        <div id="tabsList" class="flex overflow-x-auto justify-start md:justify-center gap-3 pb-4 tabs-container">
+            </div>
     </header>
 
-    <div id="loginModal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl">
-        <div class="void-card p-10 rounded-[2.5rem] w-full max-w-xs border-t-2 border-purple-600 shadow-2xl">
-            <h2 class="text-xl font-bold mb-8 text-center tracking-tighter glow-text uppercase">Authenticate</h2>
-            <div class="space-y-4 text-sm">
-                <input type="text" id="userIn" placeholder="User ID" class="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-purple-500">
-                <input type="password" id="passIn" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none focus:border-purple-500">
-                <button onclick="attemptLogin()" class="w-full bg-purple-600 text-white font-bold py-3.5 rounded-xl active:scale-95 transition shadow-lg">ENTER VOID</button>
-                <button onclick="hideLogin()" class="w-full text-gray-600 text-[10px] py-2 uppercase tracking-widest">Abort</button>
+    <section id="adminDashboard" class="max-w-6xl mx-auto mb-20 p-8 void-card rounded-[3rem] hidden relative z-50 border-t-4 border-purple-600">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">Post New Artifact</h3>
+                <input type="text" id="pName" placeholder="Product Name" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500">
+                <input type="text" id="pPrice" placeholder="Price (e.g. 150k)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <input type="text" id="pImg" placeholder="Image URL (HD)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <select id="pCat" class="w-full bg-black border border-white/10 p-3 rounded-xl outline-none text-gray-400"></select>
+                <button onclick="dbAction.addProduct()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-purple-600 hover:text-white transition uppercase text-sm">Deploy to Void</button>
             </div>
-        </div>
-    </div>
-
-    <section id="adminPanel" class="max-w-6xl mx-auto mb-16 p-6 void-card rounded-[2.5rem] hidden border-t-2 border-purple-600 relative z-10">
-        <div class="flex justify-between items-center mb-8 pb-3 border-b border-white/10">
-            <h2 class="text-xs font-bold text-purple-400 uppercase tracking-widest italic">Expansion Control</h2>
-            <button onclick="logout()" class="text-red-500 text-[10px] font-bold border border-red-900/20 px-3 py-1.5 rounded-xl active:opacity-70">DISCONNECT</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-            <div class="space-y-3">
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Post Item</p>
-                <input type="text" id="pName" placeholder="Name" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm focus:border-purple-500">
-                <input type="text" id="pPrice" placeholder="Price (150k)" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
-                <input type="text" id="pImg" placeholder="HD Image Link" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
-                <select id="pCatSelect" class="w-full bg-black border border-white/10 p-2.5 rounded-lg outline-none text-gray-400"></select>
-                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-2.5 rounded-lg hover:bg-purple-600 hover:text-white transition uppercase text-[11px]">UPLOAD TO VOID</button>
-            </div>
-            <div class="space-y-3">
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Artifact categories</p>
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">Space Logic (Categories)</h3>
                 <div class="flex gap-2">
-                    <input type="text" id="newCatName" placeholder="New category..." class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg outline-none text-sm">
-                    <button onclick="addCategory()" class="bg-purple-600 px-4 rounded-lg font-bold active:scale-95">+</button>
+                    <input type="text" id="newCat" placeholder="New Category" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                    <button onclick="dbAction.addCategory()" class="bg-purple-600 px-6 rounded-xl font-bold">+</button>
                 </div>
-                <div id="adminCatList" class="space-y-1.5 max-h-40 overflow-y-auto pr-2 mt-2"></div>
+                <div id="adminCatList" class="space-y-2 max-h-48 overflow-y-auto pr-2"></div>
             </div>
-            <div class="space-y-3">
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Global Config</p>
-                <input type="text" id="cfgTele" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
-                <input type="text" id="cfgWa" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
-                <input type="text" id="cfgText" class="w-full bg-white/5 border border-white/10 p-2.5 rounded-lg text-xs outline-none">
-                <button onclick="updateConfig()" class="w-full border border-purple-500 text-purple-500 py-2.5 rounded-lg text-[10px] uppercase font-bold hover:bg-purple-500 hover:text-white transition">SYNC SYSTEM</button>
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">System Config</h3>
+                <input type="text" id="cfgWa" placeholder="WhatsApp (628...)" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <input type="text" id="cfgTele" placeholder="Telegram Username" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <textarea id="cfgText" placeholder="Order Text" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none h-24"></textarea>
+                <button onclick="dbAction.updateConfig()" class="w-full border border-purple-500 text-purple-500 font-bold py-3 rounded-xl uppercase text-sm">Sync System</button>
             </div>
         </div>
     </section>
 
-    <main id="catalog" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-24 relative z-10"></main>
+    <main id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10 relative z-40 mb-20">
+        </main>
 
-    <footer class="py-16 text-center border-t border-white/5 relative z-10">
-        <p class="text-gray-800 text-[9px] tracking-[0.6em] uppercase italic">Void Store by Apip • 2026</p>
+    <div id="loginModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl">
+        <div class="void-card p-10 rounded-[3rem] w-full max-w-sm border-t-4 border-purple-600 shadow-2xl">
+            <h2 class="text-2xl font-bold mb-8 text-center glow-text tracking-tighter uppercase">Authenticate</h2>
+            <div class="space-y-4">
+                <input type="text" id="userInput" placeholder="User ID" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-purple-500">
+                <input type="password" id="passInput" placeholder="Access Key" class="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-purple-500">
+                <button onclick="login()" class="w-full bg-purple-600 text-white font-bold py-4 rounded-2xl active:scale-95 transition shadow-lg">ENTER THE VOID</button>
+                <button onclick="toggleLoginModal()" class="w-full text-gray-600 text-[10px] py-2 uppercase tracking-widest">Abort Access</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-20 text-center border-t border-white/5 relative z-40">
+        <p class="text-gray-700 text-[10px] tracking-[1em] uppercase italic">Void Store • Gojo Satoru Edition • 2026</p>
     </footer>
 
     <script>
-        // SAMA SEPERTI SEBELUMNYA, PASTIKAN FIREBASE CONFIG TETAP TERISI
+        // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -186,82 +208,84 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let isAdmin = false, masterData = null, categories = {}, shopConfig = { tele: 'apipvoid', wa: '628', text: 'Order' }, currentTab = 'all', searchQuery = '';
+        // --- STATE MANAGEMENT ---
+        let state = {
+            products: {},
+            categories: {},
+            config: { wa: '', tele: '', text: 'Halo Admin, saya mau beli' },
+            currentFilter: 'all',
+            searchQuery: '',
+            isAdmin: false
+        };
 
-        // LOGIN SYSTEM
-        function showLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
-        function hideLogin() { document.getElementById('loginModal').classList.add('hidden'); }
+        // --- CORE FUNCTIONS ---
+        function toggleLoginModal() { document.getElementById('loginModal').classList.toggle('hidden'); }
 
-        function attemptLogin() {
-            if(document.getElementById('userIn').value === "admin9080" && document.getElementById('passIn').value === "9080") {
-                isAdmin = true;
-                document.getElementById('adminPanel').classList.remove('hidden');
+        function login() {
+            const u = document.getElementById('userInput').value;
+            const p = document.getElementById('passInput').value;
+            if (u === "admin9080" && p === "9080") {
+                state.isAdmin = true;
+                document.body.classList.add('admin-mode');
+                document.getElementById('adminDashboard').classList.remove('hidden');
                 document.getElementById('loginBtn').classList.add('hidden');
-                hideLogin(); render();
-            } else { alert("VOIDED / RESTRICTED KEY"); }
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                toggleLoginModal();
+                renderAll();
+            } else { alert("ACCESS DENIED: Domain Expansion Refused."); }
         }
 
-        function logout() { isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); document.getElementById('loginBtn').classList.remove('hidden'); render(); }
-
-        // DATABASE LISTENERS
-        db.ref('config').on('value', snap => { if(snap.val()) { shopConfig = snap.val(); document.getElementById('cfgTele').value=shopConfig.tele; document.getElementById('cfgWa').value=shopConfig.wa; document.getElementById('cfgText').value=shopConfig.text; render(); } });
-        db.ref('categories').on('value', snap => { categories = snap.val() || {}; updateCategoryUI(); });
-        db.ref('products').on('value', snap => { masterData = snap.val(); render(); });
-
-        function updateCategoryUI() {
-            const tabs = document.getElementById('tabsContainer');
-            const select = document.getElementById('pCatSelect');
-            const list = document.getElementById('adminCatList');
-            tabs.innerHTML = `<button onclick="changeTab('all', event)" class="tab-btn tab-active px-5 py-1.5 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">All artifact</button>`;
-            select.innerHTML = ''; list.innerHTML = '';
-            Object.keys(categories).forEach(key => {
-                const name = categories[key].name;
-                const slug = name.toLowerCase().replace(/\s+/g, '-');
-                tabs.innerHTML += `<button onclick="changeTab('${slug}', event)" class="tab-btn px-5 py-1.5 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">${name}</button>`;
-                select.innerHTML += `<option value="${slug}">${name}</option>`;
-                list.innerHTML += `<div class="flex justify-between items-center bg-white/5 p-2 rounded-lg text-[10px]"><span>${name}</span><button onclick="deleteCategory('${key}')" class="text-red-500 active:scale-125 transition">✕</button></div>`;
-            });
+        function logout() {
+            state.isAdmin = false;
+            document.body.classList.remove('admin-mode');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            document.getElementById('loginBtn').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            renderAll();
         }
 
-        function render() {
-            const catalog = document.getElementById('catalog');
-            catalog.innerHTML = ''; if(!masterData) return;
-            Object.keys(masterData).forEach(key => {
-                const item = masterData[key];
-                if((currentTab === 'all' || item.category === currentTab) && item.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-                    const adminUI = isAdmin ? `
-                        <button onclick="deleteItem('${key}')" class="absolute top-3 right-3 bg-red-600 text-white w-8 h-8 rounded-full z-40 text-xs active:scale-110 flex items-center justify-center">✕</button>
-                        <button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-3 left-3 bg-black/95 border border-purple-500 text-[8px] px-2 py-1 rounded-lg z-40 uppercase font-bold shadow-lg">${item.soldOut ? 'Restore' : 'Sold'}</button>
-                    ` : '';
-
-                    catalog.innerHTML += `
-                        <div class="void-card rounded-[2rem] p-4 ${item.soldOut ? 'is-sold-out' : ''} relative overflow-hidden group">
-                            ${adminUI}
-                            ${item.soldOut ? '<div class="sold-out-badge">VOID</div>' : ''}
-                            <img src="${item.img}" class="product-img mb-5" onerror="this.src='https://via.placeholder.com/400x400/000/a0f?text=VOID'">
-                            <h3 class="font-bold mb-1 text-[13px] truncate glow-text">${item.name}</h3>
-                            <p class="text-purple-400 font-bold mb-5 text-[12px] italic">IDR ${item.price}</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="bg-[#0088cc] text-center py-3 rounded-2xl text-[9px] font-bold text-white uppercase active:scale-95 transition">Telegram</a>
-                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="bg-[#25d366] text-center py-3 rounded-2xl text-[9px] font-bold text-white uppercase active:scale-95 transition">WhatsApp</a>
-                            </div>
-                        </div>
-                    `;
+        // --- DATABASE ACTIONS ---
+        const dbAction = {
+            addProduct: () => {
+                const name = document.getElementById('pName').value;
+                const price = document.getElementById('pPrice').value;
+                const img = document.getElementById('pImg').value;
+                const category = document.getElementById('pCat').value;
+                if(name && price && category) {
+                    db.ref('products').push({ name, price, img: img || 'https://via.placeholder.com/500x500/000/a0f?text=VOID', category, soldOut: false });
+                    document.getElementById('pName').value = ''; document.getElementById('pPrice').value = '';
                 }
-            });
+            },
+            deleteProduct: (id) => { if(confirm("Erase from Void?")) db.ref('products/'+id).remove(); },
+            toggleSold: (id, current) => { db.ref('products/'+id).update({ soldOut: !current }); },
+            addCategory: () => {
+                const name = document.getElementById('newCat').value;
+                if(name) { db.ref('categories').push({ name }); document.getElementById('newCat').value = ''; }
+            },
+            deleteCategory: (id) => { if(confirm("Destroy Space?")) db.ref('categories/'+id).remove(); },
+            updateConfig: () => {
+                const wa = document.getElementById('cfgWa').value;
+                const tele = document.getElementById('cfgTele').value;
+                const text = document.getElementById('cfgText').value;
+                db.ref('config').set({ wa, tele, text });
+                alert("System Synced!");
+            }
+        };
+
+        // --- RENDER ENGINE ---
+        function renderAll() {
+            renderTabs();
+            renderProducts();
+            renderAdminTools();
         }
 
-        function addCategory() { const n = document.getElementById('newCatName').value; if(n) db.ref('categories').push({name:n}); document.getElementById('newCatName').value=''; }
-        function deleteCategory(k) { if(confirm("Hapus kategori?")) db.ref('categories/'+k).remove(); }
-        function addProduct() {
-            const n = document.getElementById('pName').value, p = document.getElementById('pPrice').value, i = document.getElementById('pImg').value, c = document.getElementById('pCatSelect').value;
-            if(n && p && c) { db.ref('products').push({name:n, price:p, img:i || 'https://via.placeholder.com/400', category:c, soldOut:false}); document.getElementById('pName').value=''; document.getElementById('pPrice').value=''; } else { alert("VOID DATA"); }
-        }
-        function deleteItem(k) { if(confirm("Hapus?")) db.ref('products/'+k).remove(); }
-        function toggleSold(k, s) { db.ref('products/'+k).update({soldOut: !s}); }
-        function updateConfig() { db.ref('config').set({ tele:document.getElementById('cfgTele').value, wa:document.getElementById('cfgWa').value, text:document.getElementById('cfgText').value }); alert("System Synced!"); }
-        function handleSearch(v) { searchQuery = v; render(); }
-        function changeTab(t, e) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active')); if(e) e.target.classList.add('tab-active'); render(); }
-    </script>
-</body>
-</html>
+        function renderTabs() {
+            const list = document.getElementById('tabsList');
+            const adminCat = document.getElementById('adminCatList');
+            const select = document.getElementById('pCat');
+            
+            let html = `<button onclick="setFilter('all')" class="tab-btn px-6 py-2 rounded-full border border-white/10 text-[10px] font-bold uppercase ${state.currentFilter==='all'?'tab-active':''}">All Artifacts</button>`;
+            let adminHtml = '';
+            let selectHtml = '';
+
+            Object.keys(state.categories).forEach(id
