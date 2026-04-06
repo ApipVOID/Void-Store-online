@@ -9,94 +9,60 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-    <style>
-        :root { --purple-void: #a0f; }
-        body { background-color: #000; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; margin: 0; overflow-x: hidden; }
+<style>
+    /* ... (kode lainnya tetap sama, tapi ganti bagian ini) ... */
 
-        /* --- UNLIMITED VOID CORE ENGINE --- */
-        .unlimited-void-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; overflow: hidden; background: #000;
-        }
+    .unlimited-void-container {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        z-index: -1; overflow: hidden; background: #000;
+    }
 
-        /* Efek Mata Raksasa (The Eye) */
-        .void-eye {
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 800px; height: 800px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(160,0,255,0.1) 30%, transparent 70%);
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            filter: blur(60px);
-            animation: pulse-eye 10s ease-in-out infinite;
-        }
+    /* MATA RAKSASA YANG LEBIH NYATA */
+    .void-eye {
+        position: absolute;
+        top: 45%; left: 50%;
+        width: 100vw; height: 100vw;
+        /* Kita pakai gradien berlapis supaya membentuk pupil mata */
+        background: 
+            radial-gradient(circle at center, #fff 0%, transparent 10%),
+            radial-gradient(circle at center, var(--purple-void) 0%, transparent 40%),
+            radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 60%);
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        filter: blur(40px);
+        opacity: 0.7;
+        animation: pulse-eye 8s ease-in-out infinite;
+    }
 
-        /* Pola Fraktal/Distorsi Ruang */
-        .void-fractal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
-            opacity: 0.4; mix-blend-mode: overlay;
-        }
+    /* EFEK GARIS-GARIS RUANG (FRACTAL) */
+    .void-lines {
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background-image: repeating-radial-gradient(circle at center, 
+            transparent 0, transparent 20px, 
+            rgba(255,255,255,0.03) 21px, rgba(255,255,255,0.03) 22px);
+        animation: rotate-void 120s linear infinite;
+        opacity: 0.5;
+    }
 
-        /* Partikel Infinite melayang */
-        .particles {
-            position: absolute; top: 0; left: 0; width: 100%; height: 200%;
-            background: url('https://i.ibb.co/5G7y8yM/void-particles.png');
-            opacity: 0.3;
-            animation: move-particles 40s linear infinite;
-        }
+    @keyframes pulse-eye {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
+        50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.8; }
+    }
 
-        @keyframes pulse-eye {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
-        }
+    @keyframes rotate-void {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 
-        @keyframes move-particles {
-            from { transform: translateY(0); }
-            to { transform: translateY(-50%); }
-        }
+    /* Pastikan header transparan agar mata kelihatan */
+    header { background: transparent; }
+</style>
 
-        /* --- UI STYLING --- */
-        .glow-text { 
-            text-shadow: 0 0 20px var(--purple-void), 0 0 40px rgba(160, 0, 255, 0.4); 
-            background: linear-gradient(to bottom, #fff, var(--purple-void));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .void-card { 
-            background: rgba(0, 0, 0, 0.5); 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: 0.4s;
-        }
-
-        .void-card:hover {
-            border-color: var(--purple-void);
-            box-shadow: 0 0 30px rgba(160, 0, 255, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .product-img {
-            width: 100%; height: 180px; object-fit: cover; border-radius: 1rem;
-            filter: contrast(1.1) brightness(1.1);
-        }
-
-        @media (min-width: 768px) { .product-img { height: 240px; } }
-
-        .tab-active { background: var(--purple-void) !important; color: white !important; box-shadow: 0 0 15px var(--purple-void); }
-        .is-sold-out { opacity: 0.5; filter: grayscale(1); }
-        .hidden { display: none !important; }
-    </style>
-</head>
 <body class="p-4 md:p-10">
-
     <div class="unlimited-void-container">
-        <div class="void-eye"></div>
-        <div class="void-fractal"></div>
-        <div class="particles"></div>
-    </div>
-
+        <div class="void-lines"></div> <div class="void-eye"></div>   <div class="particles"></div>  </div>
     <header class="text-center mb-12 relative z-10">
         <div class="flex justify-end mb-6">
             <button onclick="showLogin()" id="loginBtn" class="text-[8px] border border-white/20 px-3 py-1.5 rounded-full text-gray-400 uppercase tracking-widest hover:border-purple-500 transition">Terminal</button>
