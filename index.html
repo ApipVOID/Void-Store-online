@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOID STORE | Gen-Z Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --purple-gojo: #a0f;
+        }
+        body {
+            background-color: #050505;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .glow-text {
+            text-shadow: 0 0 15px var(--purple-gojo), 0 0 30px var(--purple-gojo);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(160, 0, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card:hover {
+            border-color: var(--purple-gojo);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(160, 0, 255, 0.15);
+        }
+        .btn-tele {
+            background: linear-gradient(45deg, #a0f, #60f);
+            transition: 0.3s ease;
+        }
+        .btn-tele:hover {
+            letter-spacing: 1px;
+            box-shadow: 0 0 20px var(--purple-gojo);
+            filter: brightness(1.2);
+        }
+        .admin-badge {
+            background: rgba(160, 0, 255, 0.1);
+            border: 1px solid var(--purple-gojo);
+            color: var(--purple-gojo);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        input::placeholder { color: #444; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <header class="text-center mb-16">
+        <h1 class="text-5xl md:text-7xl font-bold glow-text mb-4 italic tracking-tighter">VOID STORE</h1>
+        <div class="flex justify-center items-center gap-3">
+            <span class="text-gray-500 tracking-[0.3em] uppercase text-xs">Authentic Drops</span>
+            <div id="statusBadge"></div>
+        </div>
+    </header>
+
+    <section id="adminPanel" class="max-w-2xl mx-auto mb-20 p-8 glass-card rounded-3xl hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-purple-400">Admin Dashboard ???</h2>
+            <button onclick="closeAdmin()" class="text-gray-500 hover:text-white transition">Exit Mode</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-gray-400 uppercase ml-2">Product Name</label>
+                <input type="text" id="pName" placeholder="Contoh: Hoodie Unlimited Void" class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition">
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="text-xs text-gray-400 uppercase ml-2">Price (IDR)</label>
+                <input type="text" id="pPrice" placeholder="Contoh: 250k" class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition">
+            </div>
+            <div class="flex flex-col gap-2 md:col-span-2">
+                <label class="text-xs text-gray-400 uppercase ml-2">Image URL</label>
+                <input type="text" id="pImg" placeholder="https://link-gambar.com/image.jpg" class="bg-black/50 border border-gray-800 p-3 rounded-xl focus:outline-none focus:border-purple-500 transition">
+            </div>
+            <button onclick="addProduct()" class="md:col-span-2 bg-white text-black font-black py-4 rounded-xl hover:bg-purple-500 hover:text-white transition-all transform active:scale-95 uppercase tracking-widest">
+                Post to Catalog
+            </button>
+        </div>
+    </section>
+
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        </main>
+
+    <footer class="mt-32 pb-10 text-center">
+        <p class="text-gray-700 text-xs tracking-widest uppercase mb-2">Designed for the Strongest</p>
+        <p class="text-gray-500 text-[10px]">Press Shift + A to login</p>
+    </footer>
+
+    <script>
+        // CONFIGURATION
+        const TELEGRAM_USERNAME = "fyzzrq"; // Ganti ke username Tele kamu
+        const ADMIN_PASSWORD = "VOIDE9"; // Password rahasia
+        
+        let products = JSON.parse(localStorage.getItem('void_store_data')) || [];
+        let isAdminActive = false;
+
+        // 1. Detection for Shift + A (Hidden Login)
+        document.addEventListener('keydown', (e) => {
+            if (e.shiftKey && e.key === 'A') {
+                const access = prompt("Enter Domain Expansion Code:");
+                if (access === ADMIN_PASSWORD) {
+                    isAdminActive = true;
+                    showAdminPanel();
+                } else {
+                    alert("You are weak. Access denied.");
+                }
+            }
+        });
+
+        function showAdminPanel() {
+            document.getElementById('adminPanel').classList.remove('hidden');
+            document.getElementById('statusBadge').innerHTML = '<span class="admin-badge">Admin Mode</span>';
+            renderProducts();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeAdmin() {
+            isAdminActive = false;
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('statusBadge').innerHTML = '';
+            renderProducts();
+        }
+
+        // 2. Logic to Render Catalog
+        function renderProducts() {
+            const catalog = document.getElementById('catalog');
+            catalog.innerHTML = '';
+
+            if (products.length === 0) {
+                catalog.innerHTML = '<p class="col-span-full text-center text-gray-600 py-20 italic">Katalog masih kosong. Admin perlu menambah drop baru.</p>';
+                return;
+            }
+
+            products.forEach((item, index) => {
+                const deleteBtn = isAdminActive ? 
+                    `<button onclick="deleteItem(${index})" class="absolute top-4 right-4 bg-red-600/80 hover:bg-red-600 text-white w-10 h-10 rounded-full z-30 backdrop-blur-sm transition">?</button>` : '';
+
+                catalog.innerHTML += `
+                    <div class="glass-card rounded-[2rem] overflow-hidden p-5 group relative">
+                        ${deleteBtn}
+                        <div class="overflow-hidden rounded-[1.5rem] mb-5 h-72">
+                            <img src="${item.img}" alt="${item.name}" 
+                                 class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700">
+                        </div>
+                        <div class="px-2">
+                            <h3 class="text-xl font-bold mb-1 tracking-tight truncate">${item.name}</h3>
+                            <p class="text-purple-500 font-bold text-lg mb-6 tracking-tighter">IDR ${item.price}</p>
+                            <a href="https://t.me/${TELEGRAM_USERNAME}?text=Halo,%20saya%20mau%20order%20${encodeURIComponent(item.name)}" 
+                               target="_blank" 
+                               class="btn-tele block text-center py-4 rounded-2xl font-bold uppercase text-[10px] tracking-[0.2em] text-white">
+                               Buy via Telegram
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. Logic to Add Product
+        function addProduct() {
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const img = document.getElementById('pImg').value || 'https://via.placeholder.com/500x500/0a0a0a/333?text=Void+Store';
+
+            if (!name || !price) {
+                alert("Minimal isi Nama dan Harga dulu!");
+                return;
+            }
+
+            products.push({ name, price, img });
+            saveAndRefresh();
+            
+            // Clear inputs
+            document.getElementById('pName').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pImg').value = '';
+        }
+
+        // 4. Logic to Delete Product
+        function deleteItem(index) {
+            if (confirm("Hapus item ini dari katalog?")) {
+                products.splice(index, 1);
+                saveAndRefresh();
+            }
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('void_store_data', JSON.stringify(products));
+            renderProducts();
+        }
+
+        // Initial Load
+        window.onload = renderProducts;
+    </script>
+</body>
+</html>
