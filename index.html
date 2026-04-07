@@ -3,134 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID STORE | Neo-Cyber Edition</title>
+    <title>VOID STORE | v2.5 Apex</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Grotesk:wght@300;500&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --p-void: #bc13fe; --bg: #050505; }
-        body { 
-            background-color: var(--bg); 
-            color: #fff; 
-            font-family: 'Space Grotesk', sans-serif;
-            scroll-behavior: smooth;
-        }
+        :root { --p-void: #bc13fe; --bg: #030303; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
         h1, h2, h3, .font-syne { font-family: 'Syne', sans-serif; }
 
-        /* LOADING SCREEN */
+        /* --- GEN Z TYPEWRITER LOADER --- */
         #loader {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.8s cubic-bezier(0.85, 0, 0.15, 1);
         }
-        .load-text { font-size: 5rem; font-weight: 800; letter-spacing: -2px; line-height: 0.8; }
+        .letter { display: inline-block; opacity: 0; transform: translateY(10px); transition: 0.4s; font-size: 5rem; font-weight: 800; }
+        .letter.show { opacity: 1; transform: translateY(0); }
         
         /* THEMES */
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .void-card { transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .void-card:hover { transform: translateY(-10px); border-color: var(--p-void); box-shadow: 0 0 30px rgba(188, 19, 254, 0.15); }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .void-card { transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); }
+        .void-card:hover { transform: scale(1.02); border-color: var(--p-void); }
         
-        .btn-gradient { background: linear-gradient(90deg, #bc13fe, #7a12f5); transition: 0.3s; }
-        .btn-gradient:hover { filter: brightness(1.2); transform: scale(1.05); }
+        .btn-gradient { background: linear-gradient(135deg, #bc13fe, #5a00ff); transition: 0.3s; }
+        .btn-primary { background: #fff; color: #000; font-weight: 800; transition: 0.3s; }
+        .btn-primary:hover { background: var(--p-void); color: #fff; }
 
-        /* CUSTOM SCROLL */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: var(--p-void); border-radius: 10px; }
+        /* ANIMATIONS */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.6s forwards; }
 
-        .is-editing { border: 2px solid #fbbf24 !important; }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--p-void); }
     </style>
 </head>
-<body class="p-4 md:p-12">
+<body class="p-6 md:p-12">
 
     <div id="loader">
-        <div class="text-center">
-            <h1 class="load-text animate-pulse italic">VOID<br><span class="text-[#bc13fe]">STORE.</span></h1>
-            <p class="mt-4 tracking-[0.5em] text-[10px] uppercase opacity-50">Coded by Apip</p>
-        </div>
+        <div id="typewriter" class="font-syne italic tracking-tighter"></div>
+        <p id="loaderSub" class="mt-4 text-[9px] uppercase tracking-[0.6em] opacity-0 transition-opacity duration-1000">Coded by Apip</p>
     </div>
 
-    <div class="fixed top-0 left-0 w-full h-full -z-10 opacity-20">
-        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#bc13fe] blur-[150px] rounded-full"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#4e12f5] blur-[150px] rounded-full"></div>
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#bc13fe]/10 blur-[120px] rounded-full"></div>
     </div>
 
-    <nav class="flex justify-between items-center mb-16 relative z-50">
-        <div class="text-2xl font-extrabold tracking-tighter">V<span class="text-[#bc13fe]">S</span></div>
-        <button onclick="showLogin()" id="loginBtn" class="text-[10px] font-bold tracking-widest uppercase border-b border-white/20 pb-1 hover:text-[#bc13fe] hover:border-[#bc13fe] transition">Terminal Access</button>
+    <nav class="flex justify-between items-center mb-20 relative z-50">
+        <div class="text-xl font-black tracking-tighter">VOID<span class="text-[#bc13fe]">.</span></div>
+        <button onclick="showLogin()" class="text-[9px] font-bold tracking-widest uppercase border border-white/10 px-4 py-2 rounded-full hover:bg-white hover:text-black transition">System Log</button>
     </nav>
 
-    <header class="max-w-4xl mx-auto text-center mb-20">
-        <h2 class="text-6xl md:text-8xl font-extrabold mb-6 tracking-tighter uppercase italic">Neo Artifacts<span class="text-[#bc13fe]">.</span></h2>
-        <div class="glass p-2 rounded-2xl flex items-center max-w-xl mx-auto shadow-2xl">
-            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Find your frequency..." class="w-full bg-transparent p-4 outline-none text-center font-medium">
+    <header class="text-center mb-24 animate-fade">
+        <h1 class="text-6xl md:text-9xl font-black mb-8 italic tracking-tighter uppercase">Artifacts<span class="text-[#bc13fe]">.</span></h1>
+        <div class="glass p-2 rounded-full flex items-center max-w-lg mx-auto mb-10">
+            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Search the void..." class="w-full bg-transparent px-6 py-2 outline-none text-center">
         </div>
-        <div id="tabsContainer" class="flex flex-wrap justify-center gap-2 mt-8"></div>
+        <div id="tabsContainer" class="flex flex-wrap justify-center gap-3"></div>
     </header>
 
-    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-32"></main>
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-40"></main>
 
-    <div id="cartFloat" class="fixed bottom-8 right-8 z-[100] glass p-6 rounded-[2.5rem] border-2 border-[#bc13fe] w-80 translate-y-[150%] transition-transform duration-500">
-        <h3 class="font-bold text-xs uppercase mb-4 tracking-widest text-[#bc13fe]">Current Order</h3>
-        <div id="cartItems" class="max-h-48 overflow-y-auto mb-6 space-y-3 pr-2"></div>
-        <div class="space-y-2">
-            <button onclick="checkout('wa')" class="w-full bg-[#25d366] text-black font-bold py-3 rounded-2xl text-[10px] uppercase">Send to WhatsApp</button>
-            <button onclick="checkout('tele')" class="w-full bg-[#0088cc] text-white font-bold py-3 rounded-2xl text-[10px] uppercase">Send to Telegram</button>
-            <button onclick="clearCart()" class="w-full text-gray-500 text-[9px] uppercase font-bold tracking-widest">Clear List</button>
+    <div id="descModal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-6 backdrop-blur-xl bg-black/80">
+        <div class="glass p-8 md:p-12 rounded-[3rem] max-w-lg w-full border-t-4 border-[#bc13fe] relative animate-fade">
+            <button onclick="closeDesc()" class="absolute top-6 right-8 text-2xl opacity-50 hover:opacity-100">✕</button>
+            <h3 id="modalTitle" class="text-3xl font-black italic uppercase mb-4 tracking-tighter"></h3>
+            <div id="modalContent" class="text-gray-400 leading-relaxed mb-8 text-sm"></div>
+            <div id="modalAction"></div>
         </div>
     </div>
 
-    <section id="adminPanel" class="max-w-6xl mx-auto mb-32 p-8 glass rounded-[3rem] hidden border-t-2 border-[#bc13fe]">
-        <div class="flex justify-between items-center mb-10">
-            <h3 class="text-xl font-bold uppercase italic" id="adminTitle">Master Terminal</h3>
-            <button onclick="logout()" class="text-red-500 text-[10px] font-bold underline">EXIT</button>
+    <div id="cartFloat" class="fixed bottom-10 right-6 z-[100] glass p-8 rounded-[3rem] border-2 border-[#bc13fe] w-80 translate-y-[180%] transition-transform duration-700 shadow-[0_0_50px_rgba(188,19,254,0.2)]">
+        <div class="flex items-center gap-2 mb-6">
+            <div class="w-2 h-2 bg-[#bc13fe] animate-ping rounded-full"></div>
+            <h3 class="font-bold text-[10px] uppercase tracking-widest">Selected Artifacts</h3>
+        </div>
+        <div id="cartItems" class="max-h-40 overflow-y-auto mb-6 space-y-4 pr-2"></div>
+        <div class="space-y-3">
+            <button onclick="checkout('wa')" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest">Order via WA</button>
+            <button onclick="checkout('tele')" class="w-full bg-[#0088cc] text-white font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest">Order via Tele</button>
+            <button onclick="clearCart()" class="w-full text-gray-600 text-[9px] font-bold uppercase tracking-[0.3em]">Purge List</button>
+        </div>
+    </div>
+
+    <section id="adminPanel" class="max-w-6xl mx-auto mb-40 p-10 glass rounded-[4rem] hidden border-l-4 border-[#bc13fe] animate-fade">
+        <div class="flex justify-between items-center mb-12">
+            <h3 class="text-2xl font-black italic uppercase" id="adminTitle">Console Master</h3>
+            <button onclick="logout()" class="text-red-500 font-bold text-[10px] tracking-widest underline">DISCONNECT</button>
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div class="space-y-4">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Editor</p>
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Data Input</p>
                 <input type="hidden" id="pEditKey">
-                <input type="text" id="pName" placeholder="Artifact Name" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 focus:border-[#bc13fe]">
-                <input type="number" id="pPrice" placeholder="Price (Numbers)" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10">
-                <textarea id="pDesc" placeholder="Artifact Description..." class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10 h-24 text-sm"></textarea>
-                <input type="text" id="pImg" placeholder="Image URL" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10">
-                <select id="pCatSelect" class="w-full bg-black/50 p-4 rounded-2xl border border-white/10"></select>
-                <button id="pSubmitBtn" onclick="addProduct()" class="w-full btn-gradient font-black py-4 rounded-2xl text-xs uppercase tracking-widest shadow-lg">Push Data</button>
-                <button id="pCancelEdit" onclick="cancelEdit()" class="w-full hidden text-xs text-gray-400">Cancel Edit</button>
+                <input type="text" id="pName" placeholder="Artifact Name" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/5 focus:border-[#bc13fe]">
+                <input type="number" id="pPrice" placeholder="Price (0 = FREE)" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/5">
+                <textarea id="pDesc" placeholder="Deep details..." class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/5 h-32 text-sm"></textarea>
+                <input type="text" id="pImg" placeholder="Image URL" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/5">
+                <select id="pCatSelect" class="w-full bg-black p-4 rounded-2xl border border-white/5"></select>
+                <button id="pSubmitBtn" onclick="addProduct()" class="w-full btn-gradient font-black py-4 rounded-2xl text-xs uppercase tracking-widest">Push to Firebase</button>
+                <button id="pCancelEdit" onclick="cancelEdit()" class="w-full hidden text-xs text-gray-500">Abort Edit</button>
             </div>
 
             <div class="space-y-4">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Map Sections</p>
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Nodes</p>
                 <div class="flex gap-2">
-                    <input type="text" id="newCatName" placeholder="New Label" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/10">
+                    <input type="text" id="newCatName" placeholder="Category" class="w-full bg-white/5 p-4 rounded-2xl outline-none border border-white/5">
                     <button onclick="addCategory()" class="bg-[#bc13fe] px-6 rounded-2xl font-bold">+</button>
                 </div>
                 <div id="adminCatList" class="space-y-2"></div>
             </div>
 
             <div class="space-y-4">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em]">Core Config</p>
-                <input type="text" id="cfgWa" placeholder="WA (628...)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <input type="text" id="cfgTele" placeholder="Telegram User (tanpa @)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10">
-                <textarea id="cfgText" placeholder="Default Order Message" class="w-full bg-white/5 p-4 rounded-2xl border border-white/10 h-24 text-sm"></textarea>
-                <button onclick="updateConfig()" class="w-full border border-[#bc13fe] text-[#bc13fe] font-bold py-4 rounded-2xl text-[10px] uppercase">Sync Core</button>
+                <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Global Sync</p>
+                <input type="text" id="cfgWa" placeholder="WA (628...)" class="w-full bg-white/5 p-4 rounded-2xl border border-white/5">
+                <input type="text" id="cfgTele" placeholder="Telegram User" class="w-full bg-white/5 p-4 rounded-2xl border border-white/5">
+                <textarea id="cfgText" placeholder="Order Prefix..." class="w-full bg-white/5 p-4 rounded-2xl border border-white/5 h-24 text-sm"></textarea>
+                <button onclick="updateConfig()" class="w-full border border-[#bc13fe] text-[#bc13fe] font-bold py-4 rounded-2xl text-[10px] uppercase">Update Core</button>
             </div>
         </div>
     </section>
 
-    <div id="loginModal" class="fixed inset-0 bg-black/95 z-[999] hidden flex items-center justify-center p-6 backdrop-blur-md">
-        <div class="glass p-12 rounded-[3.5rem] w-full max-w-sm text-center border-b-8 border-[#bc13fe]">
-            <h2 class="text-3xl font-black mb-8 italic uppercase">Auth Required</h2>
-            <input type="text" id="userIn" placeholder="IDENTIFIER" class="w-full bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 outline-none text-center">
-            <input type="password" id="passIn" placeholder="ACCESS KEY" class="w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 outline-none text-center">
-            <button onclick="attemptLogin()" class="w-full btn-gradient py-4 rounded-2xl font-black tracking-widest shadow-2xl">ACCESS</button>
-            <button onclick="hideLogin()" class="mt-6 text-gray-600 text-[10px] uppercase font-bold">Abort</button>
+    <div id="loginModal" class="fixed inset-0 bg-black/98 z-[999] hidden flex items-center justify-center p-6 backdrop-blur-2xl">
+        <div class="glass p-12 rounded-[4rem] w-full max-w-sm text-center border-b-8 border-[#bc13fe]">
+            <h2 class="text-3xl font-black mb-8 italic uppercase tracking-tighter">Access Key</h2>
+            <input type="text" id="userIn" placeholder="USER" class="w-full bg-white/5 p-5 rounded-2xl mb-4 border border-white/5 outline-none text-center font-bold">
+            <input type="password" id="passIn" placeholder="KEY" class="w-full bg-white/5 p-5 rounded-2xl mb-8 border border-white/5 outline-none text-center font-bold">
+            <button onclick="attemptLogin()" class="w-full btn-gradient py-5 rounded-2xl font-black tracking-[0.2em]">AUTHENTICATE</button>
+            <button onclick="hideLogin()" class="mt-8 text-gray-700 text-[10px] font-black uppercase underline">Close</button>
         </div>
     </div>
 
     <script>
-        // CONFIG
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -145,19 +151,30 @@
 
         let state = { isAdmin: false, products: {}, categories: {}, config: {}, cart: [], currentTab: 'all', search: '', editMode: false };
 
-        // INITIAL LOAD
+        // GEN Z LOADER LOGIC
         window.onload = () => {
+            const text = "VOID STORE";
+            const container = document.getElementById('typewriter');
+            text.split('').forEach((char, i) => {
+                const span = document.createElement('span');
+                span.innerText = char === " " ? "\u00A0" : char;
+                span.className = "letter";
+                container.appendChild(span);
+                setTimeout(() => span.classList.add('show'), i * 150);
+            });
+            setTimeout(() => document.getElementById('loaderSub').style.opacity = "1", 1000);
             setTimeout(() => {
-                document.getElementById('loader').style.transform = 'translateY(-100%)';
-            }, 2000);
+                document.getElementById('loader').style.opacity = "0";
+                setTimeout(() => document.getElementById('loader').style.display = "none", 800);
+            }, 3000);
         };
 
-        // DATABASE LISTENERS
+        // DATABASE SYNC
         db.ref('/').on('value', snap => {
             const data = snap.val() || {};
             state.products = data.products || {};
             state.categories = data.categories || {};
-            state.config = data.config || { wa: '628', tele: 'void', text: 'Saya mau order artifact ini' };
+            state.config = data.config || { wa: '628', tele: 'void', text: 'Saya mau order' };
             render();
         });
 
@@ -170,11 +187,11 @@
 
         function renderTabs() {
             const container = document.getElementById('tabsContainer');
-            let html = `<button onclick="setTab('all')" class="px-8 py-3 rounded-2xl text-[10px] font-black uppercase transition-all ${state.currentTab === 'all' ? 'btn-gradient border-none' : 'glass opacity-50'}">All Space</button>`;
+            let html = `<button onclick="setTab('all')" class="px-8 py-3 rounded-full text-[10px] font-black uppercase transition-all ${state.currentTab === 'all' ? 'bg-white text-black' : 'glass opacity-40'}">All</button>`;
             Object.keys(state.categories).forEach(k => {
                 const name = state.categories[k].name;
                 const slug = name.toLowerCase().replace(/\s+/g, '-');
-                html += `<button onclick="setTab('${slug}')" class="px-8 py-3 rounded-2xl text-[10px] font-black uppercase transition-all ${state.currentTab === slug ? 'btn-gradient border-none' : 'glass opacity-50'}">${name}</button>`;
+                html += `<button onclick="setTab('${slug}')" class="px-8 py-3 rounded-full text-[10px] font-black uppercase transition-all ${state.currentTab === slug ? 'bg-white text-black' : 'glass opacity-40'}">${name}</button>`;
             });
             container.innerHTML = html;
         }
@@ -185,28 +202,27 @@
             
             Object.keys(state.products).forEach(id => {
                 const p = state.products[id];
-                const matchesTab = (state.currentTab === 'all' || p.category === state.currentTab);
-                const matchesSearch = p.name.toLowerCase().includes(state.search.toLowerCase());
-
-                if (matchesTab && matchesSearch) {
+                if ((state.currentTab === 'all' || p.category === state.currentTab) && p.name.toLowerCase().includes(state.search.toLowerCase())) {
+                    const priceDisplay = (Number(p.price) === 0) ? '<span class="text-green-400">FREE</span>' : `IDR ${Number(p.price).toLocaleString('id-ID')}`;
+                    
                     catalog.innerHTML += `
-                        <div class="void-card glass p-4 rounded-[2.5rem] relative group border border-white/5">
-                            ${p.soldOut ? '<div class="absolute inset-0 z-20 flex items-center justify-center font-black text-2xl rotate-12 text-white border-4 border-white m-10 pointer-events-none bg-black/40 backdrop-blur-sm">VOID</div>' : ''}
-                            <img src="${p.img}" class="w-full h-64 object-cover rounded-[2rem] mb-6 ${p.soldOut ? 'grayscale contrast-50' : ''}">
-                            <div class="px-2 pb-2">
-                                <h3 class="font-bold text-xl leading-tight mb-2">${p.name}</h3>
-                                <p class="text-xs text-gray-500 mb-4 line-clamp-2">${p.desc || 'No description available for this artifact.'}</p>
-                                <div class="flex justify-between items-center mb-6">
-                                    <p class="text-[#bc13fe] font-black">IDR ${Number(p.price).toLocaleString('id-ID')}</p>
+                        <div class="void-card glass p-4 rounded-[2.5rem] relative animate-fade border border-white/5">
+                            ${p.soldOut ? '<div class="absolute inset-0 z-20 flex items-center justify-center font-black text-2xl rotate-12 text-white border-4 border-white m-10 pointer-events-none bg-black/60 backdrop-blur-sm">SOLD</div>' : ''}
+                            <img src="${p.img}" class="w-full h-64 object-cover rounded-[2rem] mb-6 ${p.soldOut ? 'grayscale' : ''}">
+                            <div class="px-2">
+                                <h3 class="font-bold text-xl mb-1 truncate">${p.name}</h3>
+                                <p class="text-xs font-black text-[#bc13fe] mb-6 tracking-wider">${priceDisplay}</p>
+                                
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="viewDesc('${id}')" class="bg-white/10 py-3 rounded-xl text-[9px] font-bold uppercase hover:bg-white/20 transition">Details</button>
+                                    ${!p.soldOut ? `<button onclick="addToCart('${id}')" class="btn-primary py-3 rounded-xl text-[9px] uppercase">Add</button>` : '<div></div>'}
                                 </div>
-                                ${!p.soldOut ? `<button onclick="addToCart('${id}')" class="w-full bg-white text-black py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-[#bc13fe] hover:text-white transition">Add to List</button>` : ''}
                             </div>
                             
                             ${state.isAdmin ? `
                                 <div class="absolute top-4 left-4 flex flex-col gap-2 z-30">
-                                    <button onclick="startEdit('${id}')" class="bg-yellow-500 p-3 rounded-full text-xs shadow-xl font-bold">Edit</button>
-                                    <button onclick="db.ref('products/${id}').remove()" class="bg-red-600 p-3 rounded-full text-xs shadow-xl font-bold">Del</button>
-                                    <button onclick="db.ref('products/${id}').update({soldOut: ${!p.soldOut}})" class="bg-black p-3 border border-white/20 rounded-full text-xs shadow-xl font-bold">Toggle</button>
+                                    <button onclick="startEdit('${id}')" class="bg-yellow-500 p-3 rounded-full text-[8px] font-bold text-black">Edit</button>
+                                    <button onclick="db.ref('products/${id}').remove()" class="bg-red-600 p-3 rounded-full text-[8px] font-bold">Del</button>
                                 </div>
                             ` : ''}
                         </div>
@@ -215,40 +231,49 @@
             });
         }
 
-        // CART & CHECKOUT
+        // MODAL DESCRIPTION
+        function viewDesc(id) {
+            const p = state.products[id];
+            const modal = document.getElementById('descModal');
+            document.getElementById('modalTitle').innerText = p.name;
+            document.getElementById('modalContent').innerText = p.desc || "No further data available for this artifact.";
+            document.getElementById('modalAction').innerHTML = p.soldOut ? '' : `<button onclick="addToCart('${id}'); closeDesc();" class="w-full btn-primary py-4 rounded-2xl text-[10px] uppercase tracking-widest">Add to Selection</button>`;
+            modal.classList.remove('hidden');
+        }
+        function closeDesc() { document.getElementById('descModal').classList.add('hidden'); }
+
+        // CART LOGIC
         function addToCart(id) {
             state.cart.push(state.products[id]);
             renderCart();
             document.getElementById('cartFloat').style.transform = 'translateY(0)';
         }
-
         function renderCart() {
             const container = document.getElementById('cartItems');
             container.innerHTML = state.cart.map((item, index) => `
-                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl animate-slide-in">
-                    <div class="pr-4">
-                        <p class="text-[11px] font-bold truncate w-40">${item.name}</p>
-                        <p class="text-[9px] text-[#bc13fe]">IDR ${Number(item.price).toLocaleString('id-ID')}</p>
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase">${item.name}</p>
+                        <p class="text-[9px] text-[#bc13fe]">${Number(item.price) === 0 ? 'FREE' : 'IDR ' + Number(item.price).toLocaleString('id-ID')}</p>
                     </div>
                     <button onclick="removeFromCart(${index})" class="text-red-500 text-xs">✕</button>
                 </div>
             `).join('');
-            if (state.cart.length === 0) document.getElementById('cartFloat').style.transform = 'translateY(150%)';
+            if (state.cart.length === 0) document.getElementById('cartFloat').style.transform = 'translateY(180%)';
         }
-
         function removeFromCart(i) { state.cart.splice(i, 1); renderCart(); }
         function clearCart() { state.cart = []; renderCart(); }
 
         function checkout(platform) {
-            const items = state.cart.map(i => `- ${i.name} (IDR ${Number(i.price).toLocaleString('id-ID')})`).join('%0A');
-            const total = state.cart.reduce((sum, item) => sum + Number(item.price), 0);
+            const items = state.cart.map(i => `- ${i.name} (${Number(i.price) === 0 ? 'FREE' : 'IDR ' + Number(i.price).toLocaleString('id-ID')})`).join('%0A');
+            const total = state.cart.reduce((s, i) => s + Number(i.price), 0);
             const msg = `${state.config.text}:%0A${items}%0A%0A*Total: IDR ${total.toLocaleString('id-ID')}*`;
             
             if(platform === 'wa') window.open(`https://wa.me/${state.config.wa}?text=${msg}`);
             if(platform === 'tele') window.open(`https://t.me/${state.config.tele}?text=${msg}`);
         }
 
-        // ADMIN FEATURES
+        // ADMIN CORE
         function startEdit(id) {
             const p = state.products[id];
             state.editMode = true;
@@ -259,22 +284,17 @@
             document.getElementById('pImg').value = p.img;
             document.getElementById('pCatSelect').value = p.category;
             
-            document.getElementById('pSubmitBtn').innerText = "Update Artifact";
+            document.getElementById('pSubmitBtn').innerText = "Sync Update";
             document.getElementById('pCancelEdit').classList.remove('hidden');
-            document.getElementById('adminTitle').innerText = "Edit Mode Activated";
             window.scrollTo(0, document.getElementById('adminPanel').offsetTop - 50);
         }
 
         function cancelEdit() {
             state.editMode = false;
             document.getElementById('pEditKey').value = '';
-            document.getElementById('pName').value = '';
-            document.getElementById('pPrice').value = '';
-            document.getElementById('pDesc').value = '';
-            document.getElementById('pImg').value = '';
-            document.getElementById('pSubmitBtn').innerText = "Push Data";
+            document.getElementById('pSubmitBtn').innerText = "Push to Firebase";
             document.getElementById('pCancelEdit').classList.add('hidden');
-            document.getElementById('adminTitle').innerText = "Master Terminal";
+            ["pName", "pPrice", "pDesc", "pImg"].forEach(id => document.getElementById(id).value = '');
         }
 
         function addProduct() {
@@ -285,19 +305,26 @@
                   d = document.getElementById('pDesc').value,
                   key = document.getElementById('pEditKey').value;
 
-            if(n && p && c) {
-                const data = { name:n, price:p, img:i || 'https://via.placeholder.com/600', category:c, desc:d, soldOut:false };
-                if(state.editMode) {
-                    db.ref('products/' + key).update(data);
-                    cancelEdit();
+            // FIX BUG 0: Gunakan pengecekan eksplisit terhadap string kosong
+            if(n.trim() !== "" && p !== "" && c !== "") {
+                const data = { 
+                    name: n, 
+                    price: Number(p), 
+                    img: i || 'https://via.placeholder.com/600', 
+                    category: c, 
+                    desc: d || "", 
+                    soldOut: false 
+                };
+
+                if(state.editMode && key) {
+                    db.ref('products/' + key).update(data).then(() => cancelEdit());
                 } else {
                     db.ref('products').push(data);
                 }
-                document.getElementById('pName').value = ''; 
-                document.getElementById('pPrice').value = '';
-                document.getElementById('pDesc').value = '';
-                document.getElementById('pImg').value = '';
-            } else alert("Field Name & Price must be filled!");
+                ["pName", "pPrice", "pDesc", "pImg"].forEach(id => document.getElementById(id).value = '');
+            } else {
+                alert("Name, Price, and Category are required!");
+            }
         }
 
         // UTILS
@@ -310,7 +337,7 @@
                 state.isAdmin = true;
                 document.getElementById('adminPanel').classList.remove('hidden');
                 hideLogin(); render();
-            } else alert('Wrong Key!');
+            } else alert('Access Denied');
         }
         function logout() { state.isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); render(); }
         function addCategory() {
@@ -324,9 +351,8 @@
                 tele: document.getElementById('cfgTele').value,
                 text: document.getElementById('cfgText').value
             });
-            alert("System Config Synced!");
+            alert("Config Updated");
         }
-
         function renderAdmin() {
             const select = document.getElementById('pCatSelect');
             const list = document.getElementById('adminCatList');
@@ -335,7 +361,7 @@
                 const cat = state.categories[k];
                 const slug = cat.name.toLowerCase().replace(/\s+/g, '-');
                 select.innerHTML += `<option value="${slug}">${cat.name}</option>`;
-                list.innerHTML += `<div class="flex justify-between bg-white/5 p-3 rounded-2xl text-xs"><span>${cat.name}</span><button onclick="db.ref('categories/${k}').remove()" class="text-red-500">✕</button></div>`;
+                list.innerHTML += `<div class="flex justify-between bg-white/5 p-4 rounded-2xl text-[10px] font-bold"><span>${cat.name}</span><button onclick="db.ref('categories/${k}').remove()" class="text-red-500">✕</button></div>`;
             });
             document.getElementById('cfgWa').value = state.config.wa || '';
             document.getElementById('cfgTele').value = state.config.tele || '';
