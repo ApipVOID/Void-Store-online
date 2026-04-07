@@ -3,136 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID STORE | Web Jualan By Apip</title>
+    <title>VOID STORE | Domain Expansion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --purple-void: #a0f; }
-        body { background-color: #000; color: white; font-family: 'Space Grotesk', sans-serif; min-height: 100vh; overflow-x: hidden; }
-        
-        .glow-text { text-shadow: 0 0 20px var(--purple-void); }
+        :root { --purple-void: #a0f; --deep-black: #020202; }
+        body { background-color: var(--deep-black); color: white; font-family: 'Space Grotesk', sans-serif; overflow-x: hidden; }
 
-        /* THE VOID CARD DESIGN */
-        .void-card { 
-            background: linear-gradient(145deg, #050505, #0a0015); 
-            border: 1px solid rgba(160, 0, 255, 0.15);
-            position: relative;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* --- ADVANCED VOID BACKGROUND --- */
+        .void-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; background: radial-gradient(circle at 50% 50%, #0a0015 0%, #000 100%);
         }
+        .void-eye {
+            position: absolute; top: 50%; left: 50%; width: 120vh; height: 120vh;
+            background: radial-gradient(circle, rgba(170, 0, 255, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%); border-radius: 50%; filter: blur(80px);
+            animation: pulse 12s infinite ease-in-out;
+        }
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; } 50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; } }
 
+        /* --- UI ELEMENTS --- */
+        .glow-text { text-shadow: 0 0 15px var(--purple-void); }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(160, 0, 255, 0.1); }
+        
+        .void-card {
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%); /* Cyberpunk Cut */
+        }
         .void-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-12px) scale(1.02);
             border-color: var(--purple-void);
-            box-shadow: 0 0 30px rgba(160, 0, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(160, 0, 255, 0.2);
         }
 
-        /* HD PRODUCT IMAGE */
         .product-img {
-            width: 100%; height: 240px; object-fit: cover; border-radius: 1.5rem;
-            filter: contrast(1.1) brightness(1.1);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: 0.5s;
+            width: 100%; height: 280px; object-fit: cover;
+            transition: 0.6s; filter: saturate(1.2);
         }
+        .is-sold-out { filter: grayscale(1) brightness(0.3) contrast(1.2); }
 
-        .void-card:hover .product-img { filter: contrast(1.2) brightness(1.2); }
-
-        .btn-tele { background: linear-gradient(45deg, #0088cc, #00aaff); }
-        .btn-wa { background: linear-gradient(45deg, #25d366, #128c7e); }
-        
-        .is-sold-out img { filter: grayscale(100%) brightness(0.2) !important; }
-        .sold-out-badge { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-10deg);
-            background: var(--purple-void); color: white; padding: 4px 15px;
-            font-weight: bold; border: 2px solid white; z-index: 20; pointer-events: none; font-size: 12px;
+        /* --- CART SYSTEM --- */
+        #cartFloat {
+            position: fixed; bottom: 30px; right: 30px; z-index: 90;
+            transform: scale(0); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        #cartFloat.active { transform: scale(1); }
 
-        .tab-active { background: var(--purple-void) !important; color: white !important; box-shadow: 0 0 15px var(--purple-void); border-color: var(--purple-void) !important; }
-        .hidden { display: none !important; }
-        
-        /* Custom Scrollbar untuk i3 agar enteng */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--purple-void); }
+        /* Custom Scroll */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--purple-void); border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
 
-    <div class="flex justify-end mb-6">
-        <button onclick="showLogin()" id="loginBtn" class="text-[9px] border border-gray-800 px-4 py-2 rounded-full text-gray-600 uppercase tracking-widest hover:border-purple-500 transition">
-            Admin Terminal
-        </button>
+    <div class="void-bg"><div class="void-eye"></div></div>
+
+    <div class="flex justify-between items-center mb-10 relative z-50">
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 bg-purple-600 rounded-full animate-ping"></div>
+            <span class="text-[10px] tracking-widest uppercase text-purple-400">System Online</span>
+        </div>
+        <button onclick="showLogin()" id="loginBtn" class="text-[10px] glass px-6 py-2 rounded-full hover:bg-purple-600 transition uppercase font-bold">Terminal</button>
     </div>
 
-    <header class="text-center mb-12">
-        <h1 class="text-6xl md:text-7xl font-bold glow-text mb-2 italic tracking-tighter uppercase">Void Store</h1>
-        <p class="text-purple-500 text-[9px] tracking-[0.7em] uppercase mb-10">Premium Artifacts</p>
-        
-        <div class="max-w-xl mx-auto mb-8 px-4">
-            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Search the void..." class="w-full bg-transparent border-b border-gray-800 p-4 outline-none focus:border-purple-500 transition text-white text-center text-lg">
+    <header class="text-center mb-16 relative z-10">
+        <h1 class="text-7xl md:text-8xl font-black glow-text mb-4 italic tracking-tighter uppercase italic">Void<span class="text-purple-600">.</span></h1>
+        <div class="max-w-2xl mx-auto glass rounded-2xl p-2 flex items-center">
+            <input type="text" id="searchBar" oninput="handleSearch(this.value)" placeholder="Locate artifacts..." class="w-full bg-transparent p-4 outline-none text-center text-lg font-light">
         </div>
-
-        <div class="flex flex-wrap justify-center gap-2" id="tabsContainer"></div>
+        <div class="flex flex-wrap justify-center gap-3 mt-8" id="tabsContainer"></div>
     </header>
 
-    <div id="loginModal" class="fixed inset-0 bg-black/95 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="void-card p-8 rounded-[2rem] w-full max-w-sm border-t-4 border-purple-600">
-            <h2 class="text-xl font-bold mb-6 text-center tracking-widest">AUTHENTICATION</h2>
-            <div class="space-y-4">
-                <input type="text" id="userIn" placeholder="User ID" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm">
-                <input type="password" id="passIn" placeholder="Pass Key" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl outline-none focus:border-purple-500 text-sm">
-                <button onclick="attemptLogin()" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-500 transition">LOGIN</button>
-                <button onclick="hideLogin()" class="w-full text-gray-600 text-xs py-2">Cancel</button>
-            </div>
+    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10 min-h-[400px]">
+        </main>
+
+    <div id="cartFloat" class="glass p-6 rounded-[2rem] shadow-2xl border-2 border-purple-500 w-80">
+        <h3 class="text-xs font-bold uppercase tracking-widest mb-4 text-purple-400">Selected Items</h3>
+        <div id="cartItems" class="max-h-60 overflow-y-auto mb-4 space-y-2"></div>
+        <div class="flex gap-2">
+            <button onclick="checkout('wa')" class="flex-1 bg-green-600 py-3 rounded-xl text-[10px] font-bold uppercase">WhatsApp</button>
+            <button onclick="clearCart()" class="bg-red-900/50 px-4 rounded-xl text-xs">✕</button>
         </div>
     </div>
 
-    <section id="adminPanel" class="max-w-6xl mx-auto mb-16 p-6 void-card rounded-[2.5rem] hidden border-t-4 border-purple-600">
-        <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/5">
-            <h2 class="text-sm font-bold text-purple-400 tracking-widest uppercase italic">Master Control</h2>
-            <button onclick="logout()" class="text-red-500 text-[10px] font-bold border border-red-900/30 px-3 py-1 rounded-lg">LOGOUT</button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section id="adminPanel" class="max-w-6xl mx-auto mb-20 p-8 glass rounded-[3rem] hidden border-t-4 border-purple-600">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div class="space-y-3">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Add Product</p>
-                <input type="text" id="pName" placeholder="Name" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-sm focus:border-purple-500">
-                <input type="text" id="pPrice" placeholder="Price" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-sm">
-                <input type="text" id="pImg" placeholder="Direct Image Link" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-sm">
-                <select id="pCatSelect" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-sm text-gray-400"></select>
-                <button onclick="addProduct()" class="w-full bg-white text-black font-bold py-2 rounded-lg text-xs hover:bg-purple-500 hover:text-white transition uppercase">Post Product</button>
+                <h4 class="text-xs font-bold text-purple-400 uppercase">Artifact Deployment</h4>
+                <input type="text" id="pName" placeholder="Name" class="w-full bg-white/5 p-3 rounded-xl outline-none border border-white/10">
+                <input type="number" id="pPrice" placeholder="Price (Numbers only)" class="w-full bg-white/5 p-3 rounded-xl outline-none border border-white/10">
+                <input type="text" id="pImg" placeholder="Image Link" class="w-full bg-white/5 p-3 rounded-xl outline-none border border-white/10">
+                <select id="pCatSelect" class="w-full bg-black p-3 rounded-xl border border-white/10"></select>
+                <button onclick="addProduct()" class="w-full bg-purple-600 font-bold py-3 rounded-xl uppercase text-xs">Push to Void</button>
             </div>
-
             <div class="space-y-3">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Categories</p>
-                <div class="flex gap-2">
-                    <input type="text" id="newCatName" placeholder="New..." class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-sm">
-                    <button onclick="addCategory()" class="bg-purple-600 px-4 rounded-lg">+</button>
-                </div>
-                <div id="adminCatList" class="space-y-1 max-h-40 overflow-y-auto"></div>
+                <h4 class="text-xs font-bold text-purple-400 uppercase">Space Mapping</h4>
+                <div class="flex gap-2"><input type="text" id="newCatName" class="w-full bg-white/5 p-3 rounded-xl outline-none border border-white/10"><button onclick="addCategory()" class="bg-purple-600 px-5 rounded-xl">+</button></div>
+                <div id="adminCatList" class="space-y-2"></div>
             </div>
-
             <div class="space-y-3">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Global Config</p>
-                <input type="text" id="cfgTele" placeholder="Tele Username" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-xs">
-                <input type="text" id="cfgWa" placeholder="WA Number (62...)" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-xs">
-                <input type="text" id="cfgText" placeholder="Order Message" class="w-full bg-white/5 border border-white/10 p-2 rounded-lg outline-none text-xs">
-                <button onclick="updateConfig()" class="w-full border border-purple-500 text-purple-500 font-bold py-2 rounded-lg text-[10px] uppercase">Sync Config</button>
+                <h4 class="text-xs font-bold text-purple-400 uppercase">Core Config</h4>
+                <input type="text" id="cfgWa" placeholder="WA (628...)" class="w-full bg-white/5 p-3 rounded-xl border border-white/10">
+                <input type="text" id="cfgTele" placeholder="Tele User" class="w-full bg-white/5 p-3 rounded-xl border border-white/10">
+                <button onclick="updateConfig()" class="w-full border border-purple-500 py-3 rounded-xl uppercase text-[10px]">Sync Core</button>
+                <button onclick="logout()" class="w-full text-red-500 text-[10px] mt-4 uppercase">Disconnect Admin</button>
             </div>
         </div>
     </section>
 
-    <main id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-20"></main>
-
-    <footer class="py-16 text-center border-t border-white/5">
-        <p class="text-gray-800 text-[10px] tracking-[0.5em] uppercase">Void Store by Apip • 2026</p>
-    </footer>
+    <div id="loginModal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm text-center border-b-4 border-purple-600">
+            <h2 class="text-2xl font-bold mb-8 glow-text">KEY AUTHENTICATION</h2>
+            <input type="text" id="userIn" placeholder="User ID" class="w-full bg-white/5 p-4 rounded-2xl mb-4 border border-white/10 outline-none">
+            <input type="password" id="passIn" placeholder="Pass Key" class="w-full bg-white/5 p-4 rounded-2xl mb-8 border border-white/10 outline-none">
+            <button onclick="attemptLogin()" class="w-full bg-purple-600 py-4 rounded-2xl font-bold shadow-lg shadow-purple-500/20">ACCESS TERMINAL</button>
+            <button onclick="hideLogin()" class="mt-6 text-gray-500 text-xs">Abort</button>
+        </div>
+    </div>
 
     <script>
-        // FIREBASE CONFIG
+        // FIREBASE SETUP
         const firebaseConfig = {
             apiKey: "AIzaSyBSH2PhtUHv16CzGiMro6c2aODAtpltZrU",
             authDomain: "voidstore-b995f.firebaseapp.com",
@@ -142,141 +136,135 @@
             messagingSenderId: "210609106495",
             appId: "1:210609106495:web:d3d6d31d9ca8427c48928a"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let isAdmin = false;
-        let masterData = null;
-        let categories = {};
-        let shopConfig = { tele: 'apipvoid', wa: '628', text: 'Order' };
-        let currentTab = 'all';
-        let searchQuery = '';
+        let state = { isAdmin: false, products: {}, categories: {}, config: {}, cart: [], currentTab: 'all', search: '' };
 
-        // LOGIN/LOGOUT
-        function showLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
-        function hideLogin() { document.getElementById('loginModal').classList.add('hidden'); }
-
-        function attemptLogin() {
-            const u = document.getElementById('userIn').value;
-            const p = document.getElementById('passIn').value;
-            if(u === "admin9080" && p === "9080") {
-                isAdmin = true;
-                document.getElementById('adminPanel').classList.remove('hidden');
-                document.getElementById('loginBtn').classList.add('hidden');
-                hideLogin();
-                render();
-            } else { alert("WRONG KEY"); }
-        }
-
-        function logout() {
-            isAdmin = false;
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('loginBtn').classList.remove('hidden');
-            render();
-        }
-
-        // LISTENERS
-        db.ref('config').on('value', snap => {
-            if(snap.val()) {
-                shopConfig = snap.val();
-                document.getElementById('cfgTele').value = shopConfig.tele;
-                document.getElementById('cfgWa').value = shopConfig.wa;
-                document.getElementById('cfgText').value = shopConfig.text;
-                render();
-            }
-        });
-
-        db.ref('categories').on('value', snap => {
-            categories = snap.val() || {};
-            updateCategoryUI();
-        });
-
-        db.ref('products').on('value', snap => {
-            masterData = snap.val();
+        // CORE LOGIC
+        db.ref('/').on('value', snap => {
+            const data = snap.val() || {};
+            state.products = data.products || {};
+            state.categories = data.categories || {};
+            state.config = data.config || { wa: '628', tele: 'void', text: 'Order artifact' };
             render();
         });
-
-        function updateCategoryUI() {
-            const tabs = document.getElementById('tabsContainer');
-            const select = document.getElementById('pCatSelect');
-            const list = document.getElementById('adminCatList');
-            
-            tabs.innerHTML = `<button onclick="changeTab('all', event)" class="tab-btn tab-active px-5 py-2 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">All Space</button>`;
-            select.innerHTML = ''; list.innerHTML = '';
-            
-            Object.keys(categories).forEach(key => {
-                const name = categories[key].name;
-                const slug = name.toLowerCase().replace(/\s+/g, '-');
-                tabs.innerHTML += `<button onclick="changeTab('${slug}', event)" class="tab-btn px-5 py-2 rounded-full border border-gray-800 text-[10px] font-bold uppercase transition">${name}</button>`;
-                select.innerHTML += `<option value="${slug}">${name}</option>`;
-                list.innerHTML += `<div class="flex justify-between bg-white/5 p-2 rounded-lg text-[10px]"><span>${name}</span><button onclick="deleteCategory('${key}')" class="text-red-500">✕</button></div>`;
-            });
-        }
 
         function render() {
+            renderTabs();
+            renderCatalog();
+            renderAdmin();
+            renderCart();
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabsContainer');
+            let html = `<button onclick="setTab('all')" class="px-6 py-2 rounded-full border border-white/10 text-xs uppercase font-bold transition ${state.currentTab === 'all' ? 'bg-purple-600 border-purple-600' : ''}">All</button>`;
+            Object.keys(state.categories).forEach(k => {
+                const cat = state.categories[k];
+                const slug = cat.name.toLowerCase().replace(/\s+/g, '-');
+                html += `<button onclick="setTab('${slug}')" class="px-6 py-2 rounded-full border border-white/10 text-xs uppercase font-bold transition ${state.currentTab === slug ? 'bg-purple-600 border-purple-600' : ''}">${cat.name}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderCatalog() {
             const catalog = document.getElementById('catalog');
             catalog.innerHTML = '';
-            if(!masterData) return;
             
-            Object.keys(masterData).forEach(key => {
-                const item = masterData[key];
-                const matchesTab = (currentTab === 'all' || item.category === currentTab);
-                const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-                if(matchesTab && matchesSearch) {
-                    const adminUI = isAdmin ? `
-                        <button onclick="deleteItem('${key}')" class="absolute top-3 right-3 bg-red-600 text-white w-8 h-8 rounded-full z-40 shadow-lg">✕</button>
-                        <button onclick="toggleSold('${key}', ${item.soldOut})" class="absolute top-3 left-3 bg-black border border-purple-500 text-[8px] px-2 py-1 rounded-lg z-40 uppercase font-bold">
-                            ${item.soldOut ? 'Available' : 'Sold Out'}
-                        </button>
-                    ` : '';
-
+            Object.keys(state.products).forEach(id => {
+                const p = state.products[id];
+                if ((state.currentTab === 'all' || p.category === state.currentTab) && p.name.toLowerCase().includes(state.search.toLowerCase())) {
                     catalog.innerHTML += `
-                        <div class="void-card rounded-[2rem] p-4 ${item.soldOut ? 'is-sold-out' : ''}">
-                            ${adminUI}
-                            ${item.soldOut ? '<div class="sold-out-badge">VOID / SOLD</div>' : ''}
-                            <img src="${item.img}" class="product-img mb-4" onerror="this.src='https://via.placeholder.com/400x400/000/a0f?text=VOID+ITEM'">
-                            <h3 class="font-bold mb-1 text-sm">${item.name}</h3>
-                            <p class="text-purple-500 font-bold mb-4 text-sm italic">IDR ${item.price}</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <a href="https://t.me/${shopConfig.tele}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-tele text-center py-2.5 rounded-xl text-[9px] font-bold text-white uppercase">Telegram</a>
-                                <a href="https://wa.me/${shopConfig.wa}?text=${encodeURIComponent(shopConfig.text + ' ' + item.name)}" target="_blank" class="btn-wa text-center py-2.5 rounded-xl text-[9px] font-bold text-white uppercase">WhatsApp</a>
+                        <div class="void-card glass relative overflow-hidden group">
+                            ${p.soldOut ? '<div class="absolute inset-0 z-20 flex items-center justify-center font-black text-2xl rotate-12 text-white border-4 border-white m-10 pointer-events-none">VOID SOLD</div>' : ''}
+                            <img src="${p.img}" class="product-img ${p.soldOut ? 'is-sold-out' : 'group-hover:scale-110'}">
+                            <div class="p-6">
+                                <h3 class="font-bold text-lg mb-1 truncate">${p.name}</h3>
+                                <p class="text-purple-400 font-black mb-6">IDR ${Number(p.price).toLocaleString('id-ID')}</p>
+                                ${!p.soldOut ? `
+                                    <button onclick="addToCart('${id}')" class="w-full bg-white text-black py-3 rounded-xl font-bold text-[10px] uppercase hover:bg-purple-600 hover:text-white transition">Add to Cart</button>
+                                ` : '<div class="h-10"></div>'}
                             </div>
+                            ${state.isAdmin ? `
+                                <div class="absolute top-2 left-2 flex gap-2 z-30">
+                                    <button onclick="db.ref('products/${id}').remove()" class="bg-red-600 p-2 rounded-lg text-xs">Del</button>
+                                    <button onclick="db.ref('products/${id}').update({soldOut: ${!p.soldOut}})" class="bg-black p-2 rounded-lg text-xs">Status</button>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }
             });
         }
 
-        // ACTIONS
+        // CART LOGIC
+        function addToCart(id) {
+            const p = state.products[id];
+            state.cart.push(p);
+            renderCart();
+            document.getElementById('cartFloat').classList.add('active');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            container.innerHTML = state.cart.map((item, index) => `
+                <div class="flex justify-between items-center text-[10px] bg-white/5 p-2 rounded-lg">
+                    <span>${item.name}</span>
+                    <button onclick="removeFromCart(${index})" class="text-red-500 font-bold">✕</button>
+                </div>
+            `).join('');
+            if (state.cart.length === 0) document.getElementById('cartFloat').classList.remove('active');
+        }
+
+        function removeFromCart(i) { state.cart.splice(i, 1); renderCart(); }
+        function clearCart() { state.cart = []; renderCart(); }
+
+        function checkout(platform) {
+            const items = state.cart.map(i => `- ${i.name} (IDR ${Number(i.price).toLocaleString('id-ID')})`).join('%0A');
+            const msg = `${state.config.text}:%0A${items}`;
+            if(platform === 'wa') window.open(`https://wa.me/${state.config.wa}?text=${msg}`);
+        }
+
+        // ADMIN TOOLS
+        function setTab(t) { state.currentTab = t; render(); }
+        function handleSearch(v) { state.search = v; render(); }
+        function showLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
+        function hideLogin() { document.getElementById('loginModal').classList.add('hidden'); }
+        function attemptLogin() {
+            if(document.getElementById('userIn').value === 'admin9080' && document.getElementById('passIn').value === '9080') {
+                state.isAdmin = true;
+                document.getElementById('adminPanel').classList.remove('hidden');
+                hideLogin(); render();
+            } else alert('Wrong Key!');
+        }
+        function logout() { state.isAdmin = false; document.getElementById('adminPanel').classList.add('hidden'); render(); }
+
+        function addProduct() {
+            const n = document.getElementById('pName').value, p = document.getElementById('pPrice').value, i = document.getElementById('pImg').value, c = document.getElementById('pCatSelect').value;
+            if(n && p && c) db.ref('products').push({name:n, price:p, img:i || 'https://via.placeholder.com/500', category:c, soldOut:false});
+        }
+
         function addCategory() {
             const n = document.getElementById('newCatName').value;
             if(n) db.ref('categories').push({name:n});
-            document.getElementById('newCatName').value = '';
-        }
-        function deleteCategory(k) { if(confirm("Hapus kategori?")) db.ref('categories/'+k).remove(); }
-        
-        function addProduct() {
-            const n = document.getElementById('pName').value, p = document.getElementById('pPrice').value, i = document.getElementById('pImg').value, c = document.getElementById('pCatSelect').value;
-            if(n && p && c) {
-                db.ref('products').push({name:n, price:p, img:i || 'https://via.placeholder.com/400', category:c, soldOut:false});
-                document.getElementById('pName').value=''; document.getElementById('pPrice').value='';
-            } else { alert("Lengkapi data!"); }
         }
 
-        function deleteItem(k) { if(confirm("Hapus barang?")) db.ref('products/'+k).remove(); }
-        function toggleSold(k, s) { db.ref('products/'+k).update({soldOut: !s}); }
-        function updateConfig() { 
-            db.ref('config').set({ tele:document.getElementById('cfgTele').value, wa:document.getElementById('cfgWa').value, text:document.getElementById('cfgText').value });
-            alert("Synced!");
+        function updateConfig() {
+            db.ref('config').set({wa: document.getElementById('cfgWa').value, tele: document.getElementById('cfgTele').value, text: 'Saya mau order'});
         }
-        function handleSearch(v) { searchQuery = v; render(); }
-        function changeTab(t, e) {
-            currentTab = t;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
-            if(e) e.target.classList.add('tab-active');
-            render();
+
+        function renderAdmin() {
+            const select = document.getElementById('pCatSelect');
+            const list = document.getElementById('adminCatList');
+            select.innerHTML = ''; list.innerHTML = '';
+            Object.keys(state.categories).forEach(k => {
+                const cat = state.categories[k];
+                select.innerHTML += `<option value="${cat.name.toLowerCase().replace(/\s+/g, '-')}">${cat.name}</option>`;
+                list.innerHTML += `<div class="flex justify-between bg-white/5 p-2 rounded-lg text-xs"><span>${cat.name}</span><button onclick="db.ref('categories/${k}').remove()" class="text-red-500">✕</button></div>`;
+            });
+            document.getElementById('cfgWa').value = state.config.wa || '';
+            document.getElementById('cfgTele').value = state.config.tele || '';
         }
     </script>
 </body>
